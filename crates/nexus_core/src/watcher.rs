@@ -43,7 +43,7 @@ pub async fn start_watcher(
                         if s.contains("node_modules") {
                             return false; 
                         }
-                        s.ends_with(".js") || s.ends_with(".ts") || s.ends_with(".jsx") || s.ends_with(".tsx") || s.ends_with(".css")
+                        s.ends_with(".js") || s.ends_with(".ts") || s.ends_with(".jsx") || s.ends_with(".tsx") || s.ends_with(".css") || s.ends_with(".json") || s.ends_with(".png") || s.ends_with(".jpg") || s.ends_with(".jpeg") || s.ends_with(".svg") || s.ends_with(".wasm")
                     })
                     .collect();
 
@@ -55,24 +55,41 @@ pub async fn start_watcher(
                 
                 // --- Correct Loop Implementation ---
                 for path in relevant_paths {
-                     // Read file
-                     if let Ok(content) = tokio::fs::read_to_string(&path).await {
-                        // Normalize path
-                        let path_lossy = path.to_string_lossy();
-                        let relative = if path_lossy.starts_with(&root) {
-                            path_lossy.strip_prefix(&root).unwrap_or(&path_lossy)
-                        } else {
-                            &path_lossy
-                        };
-                        let normalized = relative.replace('\\', "/");
-                        let virt_path = if normalized.starts_with('/') { normalized } else { format!("/{}", normalized) };
+                     // Read file (binary)
+                     let bytes = match std::fs::read(&path) {
+                         Ok(b) => b,
+                         Err(e) => {
+                             tracing::error!("Watcher failed to read {}: {}", path.display(), e);
+                             continue;
+                         }
+                     };
+                     
+                     // Normalize path
+                     let path_lossy = path.to_string_lossy();
+                     let relative = if path_lossy.starts_with(&root) {
+                         path_lossy.strip_prefix(&root).unwrap_or(&path_lossy)
+                     } else {
+                         &path_lossy
+                     };
+                     let normalized = relative.replace('\\', "/");
+                     let virt_path = if normalized.starts_with('/') { normalized } else { format!("/{}", normalized) };
 
-                        // Week 8: Compile on change
-                        let compiled = if virt_path.ends_with(".css") {
-                             crate::compiler::compile_css(&content, &virt_path)
-                        } else {
-                             crate::compiler::compile(&content, &virt_path)
-                        };
+                     let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("");
+
+                     // Week 8/11/12: Compile based on type
+                     let compiled = match ext {
+                         "css" => {
+                             let text = String::from_utf8_lossy(&bytes);
+                             crate::compiler::compile_css(&text, &virt_path)
+                         },
+                          "png" | "jpg" | "jpeg" | "gif" | "svg" | "wasm" | "json" => {
+                             crate::compiler::compile_asset(&bytes, &virt_path)
+                         },
+                         _ => {
+                             let text = String::from_utf8_lossy(&bytes);
+                             crate::compiler::compile(&text, &virt_path)
+                         }
+                     };
 
                         // Week 9: Resolve Deps using new Resolver
                         let deps = crate::parser::extract_dependencies(&compiled.code, &virt_path);

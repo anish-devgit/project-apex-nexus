@@ -11,6 +11,32 @@ pub struct CompileResult {
 }
 
 use lightningcss::stylesheet::{StyleSheet, ParserOptions, PrinterOptions};
+use base64::Engine;
+
+pub fn compile_asset(bytes: &[u8], filename: &str) -> CompileResult {
+    // 1. JSON
+    if filename.ends_with(".json") {
+         let text = String::from_utf8_lossy(bytes);
+         return CompileResult {
+             code: format!("export default {};", text),
+             sourcemap: None,
+         };
+    }
+
+    // 2. Binary / Image
+    // Limit: 8KB
+    if bytes.len() < 8 * 1024 {
+        let mime = mime_guess::from_path(filename).first_or_octet_stream();
+        let b64 = base64::engine::general_purpose::STANDARD.encode(bytes);
+        let code = format!("export default \"data:{};base64,{}\";", mime, b64);
+        return CompileResult { code, sourcemap: None };
+    }
+    
+    // 3. Emit URL (Large Asset)
+    // We assume filename is a valid URL path (virtual path used by server)
+    let code = format!("export default \"{}?raw\";", filename);
+    CompileResult { code, sourcemap: None }
+}
 
 pub fn compile_css(source: &str, _filename: &str) -> CompileResult {
     // 1. Parse & Normalize (Validate)

@@ -107,31 +107,54 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
     // Determine if vendor
     let is_vendor = abs_path.to_string_lossy().contains("node_modules");
 
-    // FIX 1: Non-blocking I/O
-    let raw_content = match tokio::fs::read_to_string(&abs_path).await {
-        Ok(c) => c,
-        Err(e) => {
-            tracing::error!("Failed to read file {}: {}", abs_path.display(), e);
-            return (StatusCode::NOT_FOUND, "File not found").into_response();
-        }
+    // Week 12: Binary Reading
+    let bytes = match tokio::fs::read(&abs_path).await {
+        Ok(b) => b,
+        Err(e) => return (StatusCode::NOT_FOUND, format!("File not found: {}", e)).into_response(),
     };
 
+    // Week 12: Raw Asset Serving
+    if uri.query() == Some("raw") {
+        let mime = mime_guess::from_path(&abs_path).first_or_octet_stream();
+        let mut headers = HeaderMap::new();
+        headers.insert(axum::http::header::CONTENT_TYPE, mime.as_ref().parse().unwrap());
+        return (StatusCode::OK, headers, bytes).into_response();
+    }
+    
+    // Determine Compiler
     let compiled_code;
     let sourcemap;
     
+    // Check extensions
+    // Asset extensions: png, jpg, jpeg, gif, svg, wasm, json
+    // We can use a helper or simplistic check
+    let ext = std::path::Path::new(path_str).extension().and_then(|s| s.to_str()).unwrap_or("");
+    
     if is_vendor {
-        compiled_code = raw_content;
+        // Vendor usually JS text
+        compiled_code = String::from_utf8_lossy(&bytes).to_string();
         sourcemap = None;
-    } else if path_str.ends_with(".css") {
-        let res = compiler::compile_css(&raw_content, path_str);
-        compiled_code = res.code;
-        sourcemap = res.sourcemap;
     } else {
-        // Week 8: Compile
-        // Use path_str or abs_path? path_str usually sufficient for extension detection.
-        let res = compile(&raw_content, path_str);
-        compiled_code = res.code;
-        sourcemap = res.sourcemap;
+        match ext {
+            "css" => {
+                let text = String::from_utf8_lossy(&bytes);
+                let res = compiler::compile_css(&text, path_str);
+                compiled_code = res.code;
+                sourcemap = res.sourcemap;
+            },
+            "png" | "jpg" | "jpeg" | "gif" | "svg" | "wasm" | "json" => {
+                let res = compiler::compile_asset(&bytes, path_str);
+                compiled_code = res.code;
+                sourcemap = res.sourcemap;
+            },
+            _ => {
+                // Default JS/TS
+                let text = String::from_utf8_lossy(&bytes);
+                let res = compile(&text, path_str);
+                compiled_code = res.code;
+                sourcemap = res.sourcemap;
+            }
+        }
     }
 
     // Week 4: Extract Dependencies (from compiled/raw JS)
