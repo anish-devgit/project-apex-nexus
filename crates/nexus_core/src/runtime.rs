@@ -9,9 +9,8 @@ pub const NEXUS_RUNTIME_JS: &str = r#"
   // 3. The Register Function
   global.__nexus_register__ = function(id, factoryFn) {
     global.__nexus_modules__[id] = factoryFn;
-    if (global.__nexus_cache__[id]) {
-      delete global.__nexus_cache__[id];
-    }
+    // FIX 1: Stop eager cache eviction.
+    // We let HMR logic handle cache invalidation externally or via hot.dispose.
   };
 
   // 4. The Require Function
@@ -25,7 +24,17 @@ pub const NEXUS_RUNTIME_JS: &str = r#"
       throw new Error(`[Nexus] Module not found: ${id}`);
     }
 
-    const module = { exports: {} };
+    // FIX 2 & 3: Inject module.hot stub and module.id
+    const module = {
+      id: id,
+      exports: {},
+      hot: {
+        accept: function() {},
+        dispose: function() {},
+        data: null
+      }
+    };
+    
     global.__nexus_cache__[id] = module;
 
     try {
@@ -43,3 +52,4 @@ pub const NEXUS_RUNTIME_JS: &str = r#"
   };
 })(typeof window !== 'undefined' ? window : this);
 "#;
+

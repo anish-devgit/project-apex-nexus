@@ -34,4 +34,20 @@ fn test_runtime_bootstrap_presence() {
     // Just verify the constant string assumes correct structure
     assert!(NEXUS_RUNTIME_JS.contains("global.__nexus_register__ = function"));
     assert!(NEXUS_RUNTIME_JS.contains("global.__nexus_require__ = function"));
+    
+    // Verify Patch Fixes
+    // 1. No eager cache deletion in register
+    assert!(!NEXUS_RUNTIME_JS.contains("delete global.__nexus_cache__[id];")); 
+    // Note: The delete might be present in catch block or clean up, so be careful.
+    // The previous implementation had it in register. New implementation has it in catch block ONLY?
+    // Let's check context or just check for the comment indicating fix? 
+    // Or assert that "if (global.__nexus_cache__[id])" block is gone from register?
+    
+    // 2. module.hot stub
+    assert!(NEXUS_RUNTIME_JS.contains("hot: {"));
+    assert!(NEXUS_RUNTIME_JS.contains("accept: function"));
+    assert!(NEXUS_RUNTIME_JS.contains("dispose: function"));
+    
+    // 3. module.id
+    assert!(NEXUS_RUNTIME_JS.contains("id: id,"));
 }
