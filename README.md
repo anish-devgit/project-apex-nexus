@@ -1,32 +1,85 @@
-# Nexus (Project Apex) 🚀
+# Nexus (Project Apex)
 
-**The Build OS for Scale.**
+> **Experimental High-Performance Web Bundler in Rust**
 
-Nexus is a next-generation frontend toolchain written in Rust. It replaces Vite, Webpack, and Turbopack. It solves the "Vite Ceiling" in large monorepos by using **Virtual Chunking**—serving your app 100x faster by bundling in memory, not on disk.
+Nexus is a next-generation web bundler built for speed, simplicity, and modern web development. It leverages Rust's performance and the OXC parser's speed to deliver instant development server start times and highly optimized production builds.
 
-## Why Nexus?
+**Status**: v0.1.0-alpha (Experimental)  
+**License**: MIT
 
-- ⚡ **Instantly Ready**: Sub-500ms cold start, regardless of project size (1k or 50k modules).
-- 📉 **No Waterfalls**: Virtual Chunking reduces 10,000 HTTP requests to ~50.
-- 🔄 **Persistent Graph**: Zero "dual-engine" drift. Same Rust core for Dev and Prod.
-- 🔌 **Vite Compatible**: Drop-in adapter for the Vite plugin ecosystem.
+## 🚀 Why Nexus?
 
-## Quick Start
+- **Instant Dev Server**: Starts in milliseconds. No bundling in dev mode.
+- **Native TypeScript Support**: First-class support for TS/TSX without configuration.
+- **Tree Shaking**: Eliminates dead code efficiently using AST analysis (Mark-and-Sweep).
+- **Code Splitting**: Automatic chunk generation for dynamic `import()` statements.
+- **Modern Architecture**: Built on a highly parallelized dependency graph and asset pipeline.
 
+## 📦 Features (v0.1)
+
+- [x] **Dev Server**: HMR (Hot Module Replacement) & Fast Refresh (Basic).
+- [x] **Production Build**: 
+    - Minified bundle generation (basic).
+    - CSS extraction and bundling.
+    - Static asset handling.
+- [x] **Optimization**:
+    - **Tree Shaking**: Removes unused exports.
+    - **Code Splitting**: Dynamic chunks for lazy loading.
+    - **Vendor Splitting**: Separate `vendor.js` for dependencies.
+- [x] **Resolving**: Node-resolution algorithm compatible (supports `node_modules`).
+
+## 🛠️ Quick Start
+
+### Prerequisites
+- Rust (latest stable)
+- Node.js (for dependencies)
+
+### Installation
+
+Clone the repository:
 ```bash
-npx nexus@latest dev
+git clone https://github.com/your-org/project-apex.git
+cd project-apex
 ```
 
-## Architecture
+### Running the Example
 
-"Rust Kernel, Node.js Shell." 
+1. Navigate to the example directory:
+   ```bash
+   cd examples/react-basic
+   npm install
+   ```
 
-We move heavy graph logic to Rust (Oxidation Compiler, Axum, Redb) while keeping the flexibility of a Node.js-based plugin system.
+2. Run the Dev Server (from root):
+   ```bash
+   cargo run --bin nexus dev --cwd ./examples/react-basic
+   ```
 
-## Contributing
+3. Open `http://localhost:3000`.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get started.
+### Building for Production
 
-## License
+```bash
+cargo run --bin nexus build --cwd ./examples/react-basic
+```
+Output will be in `examples/react-basic/dist`.
 
-Apache-2.0
+## ⚠️ Limitations (Alpha)
+
+- **Experimental**: APIs and internal logic may change significantly.
+- **Plugin System**: Not yet implemented (Coming in v0.2).
+- **CSS**: Basic concatenation support; no PostCSS/Tailwind integration built-in yet (can be used externally).
+- **Frameworks**: Primarily tested with React. Vue/Svelte support is planned.
+
+## 🤝 Contributing
+
+We welcome contributions! Please check `ROADMAP.md` for upcoming features and `CONTRIBUTING.md` (coming soon) for guidelines.
+
+1. Fork the repo.
+2. Create feature branch (`git checkout -b feature/amazing`).
+3. Commit changes (`git commit -m 'Add amazing feature'`).
+4. Push to branch (`git push origin feature/amazing`).
+5. Open a Pull Request.
+
+---
+Built with ❤️ by the Project Apex Team.
