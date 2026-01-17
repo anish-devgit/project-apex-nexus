@@ -19,6 +19,8 @@ use parser::extract_dependencies;
 pub mod compiler;
 use compiler::compile;
 pub mod watcher;
+pub mod resolver;
+use resolver::NexusResolver;
 
 // --- DATA STRUCTURES ---
 
@@ -27,6 +29,7 @@ struct AppState {
     graph: Arc<RwLock<ModuleGraph>>,
     root_dir: String,
     hmr_tx: tokio::sync::broadcast::Sender<watcher::HmrMessage>,
+    resolver: Arc<NexusResolver>,
 }
 
 // --- MODULE HANDLER ---
@@ -53,34 +56,25 @@ async fn handle_sourcemap(
     (StatusCode::NOT_FOUND, "Sourcemap not found").into_response()
 }
 
-fn resolve_import(base_path: &str, import_spec: &str) -> String {
-    let base = std::path::Path::new(base_path);
-    let parent = base.parent().unwrap_or_else(|| std::path::Path::new("/"));
-    
-    // Join and normalize
-    let joined = parent.join(import_spec);
-    
-    // Normalize (std::fs::canonicalize requires file existence, so we do logical normaliztion)
-    let mut normalized = std::path::PathBuf::new();
-    for component in joined.components() {
-        match component {
-            std::path::Component::RootDir => normalized.push("/"),
-            std::path::Component::Normal(c) => normalized.push(c),
-            std::path::Component::ParentDir => { normalized.pop(); },
-            std::path::Component::CurDir => {},
-            _ => {},
-        }
+// Helper to normalize path specifically for Graph Keys (URI-like)
+fn normalize_path_for_graph(path: &std::path::Path) -> String {
+    let s = path.to_string_lossy().to_string();
+    let normalized = s.replace('\\', "/");
+    if !normalized.starts_with('/') {
+        format!("/{}", normalized)
+    } else {
+        normalized
     }
-    
-    let s = normalized.to_string_lossy().to_string();
-    s.replace('\\', "/")
 }
 
 async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
     let path_str = uri.path();
     tracing::info!("Intercepted request: {}", path_str);
 
-    // FIX 2: Path Sanitization
+    // FIX 2: Path Sanitization (Still needed for initial entry point from browser)
+    // Browser requests http://localhost:3000/src/index.tsx
+    // We map this to File System.
+    
     let mut safe_path = std::path::PathBuf::new();
     for component in std::path::Path::new(path_str).components() {
         match component {
@@ -94,6 +88,9 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
     }
 
     let abs_path = std::path::Path::new(&state.root_dir).join(&safe_path);
+    
+    // Determine if vendor
+    let is_vendor = abs_path.to_string_lossy().contains("node_modules");
 
     // FIX 1: Non-blocking I/O
     let raw_content = match tokio::fs::read_to_string(&abs_path).await {
@@ -104,11 +101,22 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
         }
     };
 
-    // Week 8: Compile
-    let compiled = compile(&raw_content, path_str);
+    let compiled_code;
+    let sourcemap;
+    
+    if is_vendor {
+        compiled_code = raw_content;
+        sourcemap = None;
+    } else {
+        // Week 8: Compile
+        // Use path_str or abs_path? path_str usually sufficient for extension detection.
+        let res = compile(&raw_content, path_str);
+        compiled_code = res.code;
+        sourcemap = res.sourcemap;
+    }
 
-    // Week 4: Extract Dependencies (from compiled ESM JS)
-    let deps = extract_dependencies(&compiled.code, path_str);
+    // Week 4: Extract Dependencies (from compiled/raw JS)
+    let deps = extract_dependencies(&compiled_code, path_str);
 
     let final_content;
     let module_id;
@@ -116,38 +124,72 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
     {
         let mut graph = state.graph.write().unwrap();
         
+        // Find existing module by path or add new.
+        // For the *entry* request, we use the requested path as key.
+        // Ideally we should resolve it too to ensure canonical key?
+        // But browser requested `/src/index.tsx`.
         let id_opt = graph.find_by_path(path_str);
         
         let current_id = if let Some(id) = id_opt {
             id
         } else {
-            // Add with placeholder
             graph.add_module(path_str, "")
         };
         module_id = current_id;
-
-        // Append SourceMap URL
-        final_content = format!("{}\n//# sourceMappingURL=/_nexus/sourcemap/{}", compiled.code, current_id.0);
         
-        // Update Graph with compiled source and map
-        graph.update_compiled(current_id, &final_content, compiled.sourcemap);
+        // Append SourceMap URL if present
+        if sourcemap.is_some() {
+            final_content = format!("{}\n//# sourceMappingURL=/_nexus/sourcemap/{}", compiled_code, current_id.0);
+        } else {
+            final_content = compiled_code;
+        }
         
-        // Populate dependencies
+        // Update Graph
+        graph.update_compiled(current_id, &final_content, sourcemap);
+        graph.mark_vendor(current_id, is_vendor);
+        
+        // Resolve Dependencies
+        let mut resolved_imports = std::collections::HashMap::new();
+        
         for dep_spec in deps {
-            // Filter only relative imports for Week 4
-            if dep_spec.starts_with("./") || dep_spec.starts_with("../") {
-                let resolved_path = resolve_import(path_str, &dep_spec);
-                
-                let dep_id = if let Some(id) = graph.find_by_path(&resolved_path) {
-                    id
-                } else {
-                    // Add missing module with empty source (placeholder)
-                    graph.add_module(&resolved_path, "")
-                };
-                
-                let _ = graph.add_dependency(current_id, dep_id);
+            // Week 9: Use Resolver
+            match state.resolver.resolve(&abs_path, &dep_spec) {
+                Ok(resolved_abs_path) => {
+                     // Convert absolute fs path to "virtual" graph path (URI)
+                     // If it's inside root_dir, make relative to root.
+                     // If outside (e.g. symlink?), we might have issues.
+                     // Generally assume inside root or node_modules inside root.
+                     
+                     let normalized_abs = resolved_abs_path.to_string_lossy(); // normalize slashes?
+                     
+                     // Create a graph key.
+                     // If inside root, strip root prefix.
+                     let graph_key = if let Ok(rel) = resolved_abs_path.strip_prefix(&state.root_dir) {
+                         normalize_path_for_graph(rel)
+                     } else {
+                         // Fallback? Or treat as absolute?
+                         normalize_path_for_graph(&resolved_abs_path)
+                     };
+                     
+                     resolved_imports.insert(dep_spec.clone(), graph_key.clone());
+                     
+                     let dep_id = if let Some(id) = graph.find_by_path(&graph_key) {
+                         id
+                     } else {
+                         // Add missing module with empty source (placeholder)
+                         graph.add_module(&graph_key, "")
+                     };
+                     
+                     let _ = graph.add_dependency(current_id, dep_id);
+                }
+                Err(e) => {
+                    tracing::error!("Failed to resolve import '{}' from '{}': {}", dep_spec, path_str, e);
+                    // We don't panic here, but linker might fail later if ID missing.
+                }
             }
         }
+        
+        graph.set_imports(current_id, resolved_imports);
         
         let count = graph.modules.len();
         tracing::info!("Graph Node compile update. Total Nodes: {}", count);
@@ -161,11 +203,97 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
     (StatusCode::OK, headers, final_content).into_response()
 }
 
+// --- CHUNK HANDLER ---
+
+async fn handle_chunk(
+    State(state): State<AppState>,
+    uri: Uri,
+) -> impl IntoResponse {
+    // 1. Identify Entry Module
+    // URL: /_nexus/chunk?entry=/src/main.js
+    let query = uri.query().unwrap_or("");
+    let mut entry_path = "";
+    for pair in query.split('&') {
+        if let Some((k, v)) = pair.split_once('=') {
+            if k == "entry" {
+                entry_path = v;
+            }
+        }
+    }
+    
+    if entry_path.is_empty() {
+         return (StatusCode::BAD_REQUEST, "Missing entry param").into_response();
+    }
+    
+    let decoded_entry = urlencoding::decode(entry_path).unwrap_or(std::borrow::Cow::Borrowed(entry_path));
+    
+    let graph = state.graph.read().unwrap();
+    let entry_id_opt = graph.find_by_path(&decoded_entry);
+    
+    if entry_id_opt.is_none() {
+        return (StatusCode::NOT_FOUND, format!("Entry module not found: {}", decoded_entry)).into_response();
+    }
+    let entry_id = entry_id_opt.unwrap();
+
+    // 2. Linearize Graph (DFS/BFS Topo Sort)
+    let modules = graph.linearize(entry_id);
+    
+    // 3. Runtime Kernel (Week 7)
+    use runtime::NEXUS_RUNTIME_JS;
+    
+    let mut chunk = String::new();
+    chunk.push_str(NEXUS_RUNTIME_JS);
+    chunk.push('\n');
+    
+    // 3.5 HMR Client (Week 6)
+    chunk.push_str(r#"
+// --- HMR Client ---
+(function() {
+    const socket = new WebSocket("ws://" + window.location.host + "/ws");
+    socket.onmessage = function(event) {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'update') {
+            console.log("[HMR] Update received", msg.paths);
+            window.location.reload();
+        }
+    };
+    console.log("[HMR] Connected");
+})();
+"#);
+    chunk.push('\n');
+
+    // 4. Wrap Modules
+    for module_id in modules {
+        if let Some(module) = graph.modules.get(module_id.0) {
+             // 4. A. Transform Imports (Week 7 + 9)
+             let wrapped_source = transform_cjs(&module.source, &module.path, &module.imports);
+             
+             // 4. B. Wrap in Register
+             // __nexus_register__("path", function(require, module, exports) { ... })
+             // Note: module.path is the Registry Key.
+             chunk.push_str(&format!(
+                 "__nexus_register__(\"{}\", function(require, module, exports) {{\n{}\n}});\n",
+                 module.path, wrapped_source
+             ));
+        }
+    }
+
+    // 5. Bootstrap
+    chunk.push_str(&format!("__nexus_require__(\"{}\");\n", decoded_entry));
+
+    let mut headers = HeaderMap::new();
+    headers.insert("Content-Type", "application/javascript".parse().unwrap());
+    (StatusCode::OK, headers, chunk).into_response()
+}
+
 // --- SERVER ---
 
 pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error> {
     // Week 6: Start Watcher Channel
     let (tx, _) = tokio::sync::broadcast::channel(100);
+    
+    // Init Resolver
+    let resolver = Arc::new(NexusResolver::new(std::path::Path::new(&root)));
     
     // Spawn Watcher
     let watcher_tx = tx.clone();
@@ -174,15 +302,22 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
     let watcher_graph = graph.clone();
     let watcher_root = root.clone();
     let server_root = root.clone();
+    let watcher_resolver = resolver.clone(); // If watcher needs compilation, it needs resolver too?
+    // Watcher logic: "Compile on change".
+    // compilation doesn't need resolver.
+    // BUT graph updating needs resolution to find deps.
+    // So watcher MUST use resolver?
+    // Yes.
     
     tokio::spawn(async move {
-        watcher::start_watcher(watcher_root, watcher_graph, watcher_tx).await;
+        watcher::start_watcher(watcher_root, watcher_graph, watcher_tx, watcher_resolver).await;
     });
 
     let state = AppState {
         graph,
         root_dir: server_root.clone(),
         hmr_tx: tx,
+        resolver,
     };
 
     let serve_dir = ServeDir::new(&root);
@@ -194,6 +329,17 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
         async move {
             let uri = req.uri().clone();
             let path = uri.path();
+            
+            // Week 9: Handle implicit extensions if we were serving files directly?
+            // "Implicit extensons (.ts, .tsx...)"
+            // `handle_module_logic` handles specific requests.
+            // If browser asks for `/src/App`, we might fail if we don't map it.
+            // But usually linker produces correct paths with extensions (resolved).
+            // So browser asks for what Linker told it (rewritten paths? No, linker embeds modules).
+            // Browser only asks for `/src/index.tsx` (entry) -> Handled by `handle_module`.
+            // THEN `handle_chunk` serves the bundle.
+            // All other modules are INSIDE bundle. Browser never requests them individually!
+            // So `handle_module` is ONLY for the entry point (or HMR updates if we fetch individually).
             
             if path.ends_with(".ts") || path.ends_with(".tsx") || path.ends_with(".js") || path.ends_with(".jsx") {
                 let response = handle_module_logic(state, uri).await;
@@ -216,6 +362,15 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
         .route("/_nexus/sourcemap/:id", get(handle_sourcemap))
         .fallback_service(service)
         .layer(TraceLayer::new_for_http());
+
+
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    
+    tracing::info!("starting server on {}", addr);
+    let listener = tokio::net::TcpListener::bind(addr).await?;
+    axum::serve(listener, app).await
+}
+
 
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));

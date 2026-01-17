@@ -40,7 +40,7 @@ pub fn extract_dependencies(source: &str, path: &str) -> Vec<String> {
     deps
 }
 
-pub fn transform_cjs(source: &str, path: &str) -> String {
+pub fn transform_cjs(source: &str, path: &str, imports: &std::collections::HashMap<String, String>) -> String {
     // Naive implementation for Week 7 (MVP)
     // In a real implementation we would distinct Source text spans and replace them.
     // However, oxc doesn't have a "Mutation" API easily accessible without re-printing.
@@ -70,10 +70,13 @@ pub fn transform_cjs(source: &str, path: &str) -> String {
                      let end = import_decl.span.end;
                      let source_val = import_decl.source.value.as_str();
                      
+                     // Resolve specifier
+                     let resolved = imports.get(source_val).cloned().unwrap_or_else(|| source_val.to_string());
+                     
                      if let Some(specifiers) = &import_decl.specifiers {
                          if specifiers.is_empty() {
                              // import "pkg"
-                             replacements.push((start, end, format!("require(\"{}\");", source_val)));
+                             replacements.push((start, end, format!("require(\"{}\");", resolved)));
                          } else {
                              // import x from "..."
                              // Identify default import vs named.
@@ -85,17 +88,17 @@ pub fn transform_cjs(source: &str, path: &str) -> String {
                                  match spec {
                                      ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
                                          let local = s.local.name.as_str();
-                                         decls.push(format!("const {} = require(\"{}\").default;", local, source_val));
+                                         decls.push(format!("const {} = require(\"{}\").default;", local, resolved));
                                      }
                                      ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => {
                                           let local = s.local.name.as_str();
-                                          decls.push(format!("const {} = require(\"{}\");", local, source_val));
+                                          decls.push(format!("const {} = require(\"{}\");", local, resolved));
                                      }
                                      ImportDeclarationSpecifier::ImportSpecifier(s) => {
                                           let local = s.local.name.as_str();
                                           let imported = s.imported.name().as_str();
                                           // import { x } from "..." -> const x = require("...").x
-                                          decls.push(format!("const {} = require(\"{}\").{};", local, source_val, imported));
+                                          decls.push(format!("const {} = require(\"{}\").{};", local, resolved, imported));
                                      }
                                  }
                              }

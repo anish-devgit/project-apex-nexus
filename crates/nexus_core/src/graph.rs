@@ -7,6 +7,8 @@ pub struct Module {
     pub path: String,
     pub source: String,
     pub map: Option<String>,
+    pub is_vendor: bool,
+    pub imports: std::collections::HashMap<String, String>,
     pub version: u64,
 }
 
@@ -33,6 +35,8 @@ impl ModuleGraph {
             path: path.to_string(),
             source: source.to_string(),
             map: None,
+            is_vendor: false,
+            imports: std::collections::HashMap::new(),
             version: 1,
         };
         self.modules.push(module);
@@ -74,6 +78,18 @@ impl ModuleGraph {
             module.source = compiled_source.to_string();
             module.map = map;
             module.version += 1;
+        }
+    }
+
+    pub fn mark_vendor(&mut self, id: ModuleId, is_vendor: bool) {
+        if let Some(module) = self.modules.get_mut(id.0) {
+            module.is_vendor = is_vendor;
+        }
+    }
+
+    pub fn set_imports(&mut self, id: ModuleId, imports: std::collections::HashMap<String, String>) {
+        if let Some(module) = self.modules.get_mut(id.0) {
+            module.imports = imports;
         }
     }
 
