@@ -83,4 +83,28 @@ impl ModuleGraph {
     pub fn find_by_path(&self, path: &str) -> Option<ModuleId> {
         self.modules.iter().find(|m| m.path == path).map(|m| m.id)
     }
+
+    // Week 5: Linearization (Virtual Chunking)
+    // Post-order DFS traversal: visits leaf dependencies first.
+    pub fn linearize(&self, root: ModuleId) -> Vec<ModuleId> {
+        let mut visited = std::collections::HashSet::new();
+        let mut result = Vec::new();
+        self.dfs_post_order(root, &mut visited, &mut result);
+        result
+    }
+
+    fn dfs_post_order(&self, node: ModuleId, visited: &mut std::collections::HashSet<ModuleId>, result: &mut Vec<ModuleId>) {
+        if visited.contains(&node) {
+            return;
+        }
+        visited.insert(node);
+
+        if let Some(deps) = self.outgoing_edges.get(node.0) {
+            for &dep in deps {
+                self.dfs_post_order(dep, visited, result);
+            }
+        }
+        
+        result.push(node);
+    }
 }

@@ -162,6 +162,9 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
             if path.ends_with(".ts") || path.ends_with(".tsx") || path.ends_with(".js") || path.ends_with(".jsx") {
                 let response = handle_module_logic(state, uri).await;
                 Ok::<_, std::io::Error>(response)
+            } else if path.starts_with("/_nexus/chunk") {
+                 let response = handle_chunk(state, uri).await;
+                 Ok::<_, std::io::Error>(response)
             } else {
                 let res = serve_dir.oneshot(req).await;
                 match res {
@@ -187,6 +190,34 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await
+}
+
+async fn handle_chunk(state: AppState, uri: Uri) -> Response {
+    let path = uri.path().strip_prefix("/_nexus/chunk").unwrap_or("/");
+    // path is now the module path, e.g. /src/main.ts
+    
+    let graph = state.graph.read().unwrap();
+    
+    let root_id = match graph.find_by_path(path) {
+        Some(id) => id,
+        None => return (StatusCode::NOT_FOUND, "Chunk entry not found").into_response(),
+    };
+    
+    let sorted_ids = graph.linearize(root_id);
+    
+    let mut chunk_content = String::new();
+    for id in sorted_ids {
+        if let Some(module) = graph.modules.get(id.0) {
+            chunk_content.push_str(&format!("/* Module: {} */\n", module.path));
+            chunk_content.push_str(&module.source);
+            chunk_content.push('\n');
+        }
+    }
+    
+    let mut headers = HeaderMap::new();
+    headers.insert("Content-Type", "application/javascript".parse().unwrap());
+    
+    (StatusCode::OK, headers, chunk_content).into_response()
 }
 
 async fn shutdown_signal() {
