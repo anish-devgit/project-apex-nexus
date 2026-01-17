@@ -8,18 +8,23 @@ use std::path::Path;
 pub struct CompileResult {
     pub code: String,
     pub sourcemap: Option<String>,
+    // Week 13: Production Outputs
+    pub css: Option<String>,
+    pub asset: Option<(String, Vec<u8>)>,
 }
 
 use lightningcss::stylesheet::{StyleSheet, ParserOptions, PrinterOptions};
 use base64::Engine;
 
-pub fn compile_asset(bytes: &[u8], filename: &str) -> CompileResult {
+pub fn compile_asset(bytes: &[u8], filename: &str, is_prod: bool) -> CompileResult {
     // 1. JSON
     if filename.ends_with(".json") {
          let text = String::from_utf8_lossy(bytes);
          return CompileResult {
              code: format!("export default {};", text),
              sourcemap: None,
+             css: None,
+             asset: None,
          };
     }
 
@@ -29,16 +34,32 @@ pub fn compile_asset(bytes: &[u8], filename: &str) -> CompileResult {
         let mime = mime_guess::from_path(filename).first_or_octet_stream();
         let b64 = base64::engine::general_purpose::STANDARD.encode(bytes);
         let code = format!("export default \"data:{};base64,{}\";", mime, b64);
-        return CompileResult { code, sourcemap: None };
+        return CompileResult { code, sourcemap: None, css: None, asset: None };
     }
     
-    // 3. Emit URL (Large Asset)
-    // We assume filename is a valid URL path (virtual path used by server)
-    let code = format!("export default \"{}?raw\";", filename);
-    CompileResult { code, sourcemap: None }
+    // 3. Large Asset
+    if is_prod {
+        // Production: Emit file to dist/assets/
+        let name = std::path::Path::new(filename).file_name().unwrap_or_default().to_string_lossy();
+        let out_path = format!("assets/{}", name);
+        // URL for runtime (absolute)
+        let code = format!("export default \"/{}\";", out_path);
+        
+        return CompileResult {
+            code,
+            sourcemap: None,
+            css: None,
+            asset: Some((out_path, bytes.to_vec())),
+        };
+    } else {
+        // Dev: Serve Raw
+        // We assume filename is a valid URL path (virtual path used by server)
+        let code = format!("export default \"{}?raw\";", filename);
+        CompileResult { code, sourcemap: None, css: None, asset: None }
+    }
 }
 
-pub fn compile_css(source: &str, _filename: &str) -> CompileResult {
+pub fn compile_css(source: &str, _filename: &str, is_prod: bool) -> CompileResult {
     // 1. Parse & Normalize (Validate)
     // We use lightningcss to ensure valid CSS and normalize output.
     let sheet_res = StyleSheet::parse(source, ParserOptions::default());
@@ -61,6 +82,16 @@ pub fn compile_css(source: &str, _filename: &str) -> CompileResult {
             source.to_string()
         }
     };
+
+    if is_prod {
+        // Production: Extract CSS, don't generate JS injector
+        return CompileResult {
+            code: "// Extracted CSS".to_string(),
+            sourcemap: None,
+            css: Some(css_content),
+            asset: None,
+        };
+    }
 
     // 2. Wrap in JS Injector
     // Use serde_json to safely escape the CSS string for inclusion in JS
@@ -89,36 +120,40 @@ pub fn compile_css(source: &str, _filename: &str) -> CompileResult {
     CompileResult {
         code,
         sourcemap: None,
+        css: None,
+        asset: None,
     }
 }
 
-pub fn compile(source: &str, filename: &str) -> CompileResult {
+pub fn compile(source: &str, filename: &str, is_prod: bool) -> CompileResult {
     let allocator = Allocator::default();
     let source_type = SourceType::from_path(Path::new(filename)).unwrap_or_default();
-
+    
     // 1. Parse
     let ret = Parser::new(&allocator, source, source_type).parse();
-
+    
     if !ret.errors.is_empty() {
-        tracing::warn!("Parsing errors in {}: {:?}", filename, ret.errors);
-        // We continue best-effort
+         tracing::warn!("Parse errors in {}: {:?}", filename, ret.errors);
     }
-
+    
     let program = ret.program;
-    let trivias = ret.trivias;
 
     // 2. Transform (TS + JSX)
-    // Week 8 Requirement: "Enable TypeScript stripping", "Enable JSX transform"
-    // Week 10 Requirement: "Enable react.refresh and react.development"
+    // Week 10 Requirement: "Enable react.refresh and react.development" (Dev Only)
+    // Week 13: "Disable HMR/react-refresh in Production"
     
-    let transform_options = TransformOptions {
-        react: oxc_transformer::ReactOptions {
-            refresh: Some(oxc_transformer::ReactRefreshOptions::default()),
-            development: true, // Adds _source, _self for better debugging/refresh
-            ..Default::default()
-        },
-        ..TransformOptions::default() // Use default for TS etc.
-    }; 
+    let transform_options = if is_prod {
+        TransformOptions::default()
+    } else {
+        TransformOptions {
+            react: oxc_transformer::ReactOptions {
+                refresh: Some(oxc_transformer::ReactRefreshOptions::default()),
+                development: true,
+                ..Default::default()
+            },
+            ..TransformOptions::default()
+        }
+    };
     
     let ret = Transformer::new(&allocator, Path::new(filename), source_type, transform_options)
         .build(program);
@@ -127,20 +162,16 @@ pub fn compile(source: &str, filename: &str) -> CompileResult {
          tracing::warn!("Transformation errors in {}: {:?}", filename, ret.errors);
     }
     
-    let program = ret.program;
-
     // 3. Codegen
-    let codegen_options = CodegenOptions {
-        enable_source_map: true,
+    let ret = Codegen::new().with_options(CodegenOptions {
+        source_map_path: Some(std::path::PathBuf::from(filename)),
         ..CodegenOptions::default()
-    };
-    
-    let ret = Codegen::new()
-        .with_options(codegen_options)
-        .build(&program);
+    }).build(&ret.program);
 
     CompileResult {
         code: ret.source_text,
         sourcemap: ret.source_map.map(|sm| sm.to_json_string().unwrap_or_default()),
+        css: None,
+        asset: None,
     }
 }

@@ -80,14 +80,14 @@ pub async fn start_watcher(
                      let compiled = match ext {
                          "css" => {
                              let text = String::from_utf8_lossy(&bytes);
-                             crate::compiler::compile_css(&text, &virt_path)
+                             crate::compiler::compile_css(&text, &virt_path, false)
                          },
                           "png" | "jpg" | "jpeg" | "gif" | "svg" | "wasm" | "json" => {
-                             crate::compiler::compile_asset(&bytes, &virt_path)
+                             crate::compiler::compile_asset(&bytes, &virt_path, false)
                          },
                          _ => {
                              let text = String::from_utf8_lossy(&bytes);
-                             crate::compiler::compile(&text, &virt_path)
+                             crate::compiler::compile(&text, &virt_path, false)
                          }
                      };
 

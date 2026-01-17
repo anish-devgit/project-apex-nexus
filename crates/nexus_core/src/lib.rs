@@ -18,6 +18,7 @@ pub mod parser;
 use parser::extract_dependencies;
 pub mod compiler;
 use compiler::{compile, compile_css};
+pub mod bundler;
 pub mod watcher;
 pub mod resolver;
 use resolver::NexusResolver;
@@ -138,19 +139,19 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
         match ext {
             "css" => {
                 let text = String::from_utf8_lossy(&bytes);
-                let res = compiler::compile_css(&text, path_str);
+                let res = compiler::compile_css(&text, path_str, false);
                 compiled_code = res.code;
                 sourcemap = res.sourcemap;
             },
             "png" | "jpg" | "jpeg" | "gif" | "svg" | "wasm" | "json" => {
-                let res = compiler::compile_asset(&bytes, path_str);
+                let res = compiler::compile_asset(&bytes, path_str, false);
                 compiled_code = res.code;
                 sourcemap = res.sourcemap;
             },
             _ => {
                 // Default JS/TS
                 let text = String::from_utf8_lossy(&bytes);
-                let res = compile(&text, path_str);
+                let res = compile(&text, path_str, false);
                 compiled_code = res.code;
                 sourcemap = res.sourcemap;
             }
