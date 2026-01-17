@@ -27,13 +27,16 @@ pub fn compile(source: &str, filename: &str) -> CompileResult {
 
     // 2. Transform (TS + JSX)
     // Week 8 Requirement: "Enable TypeScript stripping", "Enable JSX transform"
-    // "No type checking", "No optimizations".
+    // Week 10 Requirement: "Enable react.refresh and react.development"
     
-    let transform_options = TransformOptions::default(); 
-    // Default options usually enable standard transforms based on source type?
-    // Let's verify if we need explicit configuration. 
-    // oxc_transformer 0.13 usually infers from source_type or defaults?
-    // We'll rely on defaults for now, assuming they handle TS/JSX if SourceType says so.
+    let transform_options = TransformOptions {
+        react: oxc_transformer::ReactOptions {
+            refresh: Some(oxc_transformer::ReactRefreshOptions::default()),
+            development: true, // Adds _source, _self for better debugging/refresh
+            ..Default::default()
+        },
+        ..TransformOptions::default() // Use default for TS etc.
+    }; 
     
     let ret = Transformer::new(&allocator, Path::new(filename), source_type, transform_options)
         .build(program);

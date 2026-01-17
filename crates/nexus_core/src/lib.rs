@@ -71,6 +71,21 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
     let path_str = uri.path();
     tracing::info!("Intercepted request: {}", path_str);
 
+    // Week 10: Virtual Refresh Runtime
+    if path_str == "/__nexus_react_refresh" {
+        let runtime_path = std::path::Path::new(&state.root_dir).join("node_modules/react-refresh/runtime.js");
+        match tokio::fs::read_to_string(&runtime_path).await {
+            Ok(c) => {
+                let headers = HeaderMap::new();
+                return (StatusCode::OK, headers, c).into_response();
+            },
+            Err(e) => {
+                 tracing::error!("Could not find react-refresh: {}", e);
+                 return (StatusCode::INTERNAL_SERVER_ERROR, "react-refresh not found").into_response();
+            }
+        }
+    }
+
     // FIX 2: Path Sanitization (Still needed for initial entry point from browser)
     // Browser requests http://localhost:3000/src/index.tsx
     // We map this to File System.
@@ -142,6 +157,28 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
             final_content = format!("{}\n//# sourceMappingURL=/_nexus/sourcemap/{}", compiled_code, current_id.0);
         } else {
             final_content = compiled_code;
+        }
+        
+        // Week 10: Append React Refresh Footer
+        if !is_vendor && (path_str.ends_with(".tsx") || path_str.ends_with(".jsx")) {
+             final_content.push_str(r#"
+if (module.hot) {
+  window.$RefreshReg$ = (prev, id) => {
+    const fullId = module.id + ' ' + id;
+    if (window.__NEXUS_REFRESH__) window.__NEXUS_REFRESH__.register(prev, fullId);
+  };
+
+  module.hot.accept();
+
+  if (window.__NEXUS_REFRESH__ && !window.__nexus_is_refreshing) {
+    window.__nexus_is_refreshing = true;
+    setTimeout(() => {
+      window.__NEXUS_REFRESH__.performReactRefresh();
+      window.__nexus_is_refreshing = false;
+    }, 30);
+  }
+}
+"#);
         }
         
         // Update Graph
@@ -245,16 +282,77 @@ async fn handle_chunk(
     chunk.push_str(NEXUS_RUNTIME_JS);
     chunk.push('\n');
     
-    // 3.5 HMR Client (Week 6)
+    // Week 10: Inject React Refresh Runtime
+    let rr_path = std::path::Path::new(&state.root_dir).join("node_modules/react-refresh/runtime.js");
+    if let Ok(rr_code) = tokio::fs::read_to_string(&rr_path).await {
+         chunk.push_str(&format!(
+             "__nexus_register__(\"/__nexus_react_refresh\", function(require, module, exports) {{\n{}\n}});\n",
+             rr_code
+         ));
+         
+         chunk.push_str(r#"
+(function() {
+  try {
+      const Runtime = __nexus_require__("/__nexus_react_refresh");
+      Runtime.injectIntoGlobalHook(window);
+      window.$RefreshReg$ = () => {};
+      window.$RefreshSig$ = () => (type) => type;
+      window.__NEXUS_REFRESH__ = Runtime;
+  } catch(e) { console.warn("[Nexus] React Refresh failed to load", e); }
+})();
+"#);
+    }
+    
+    // 3.5 HMR Client (Week 10)
     chunk.push_str(r#"
 // --- HMR Client ---
 (function() {
     const socket = new WebSocket("ws://" + window.location.host + "/ws");
-    socket.onmessage = function(event) {
+    socket.onmessage = async function(event) {
         const msg = JSON.parse(event.data);
         if (msg.type === 'update') {
             console.log("[HMR] Update received", msg.paths);
-            window.location.reload();
+            
+            for (const path of msg.paths) {
+                // Check if we can hot update
+                const cached = window.__nexus_cache__ && window.__nexus_cache__[path];
+                const isAccepted = cached && cached.hot && cached.hot._accepted;
+                
+                if (isAccepted) {
+                    try {
+                        const res = await fetch(path);
+                        const code = await res.text();
+                        
+                        // Update Registry
+                        // We wrap the code in a factory similar to handle_chunk
+                        // Note: We use 'eval' to execute the code in correct scope?
+                        // Actually, we pass a new factory function to register.
+                        // The factory function string:
+                        // "function(require, module, exports) { " + code + " }"
+                        // But we can't eval a function easily across scopes without `new Function` or `eval`.
+                        
+                        // We construct a factory wrapper
+                        const factory = new Function("require", "module", "exports", code);
+                        
+                        window.__nexus_register__(path, factory);
+                        
+                        // Invalidate Cache
+                        delete window.__nexus_cache__[path];
+                        
+                        // Re-require to execute (and trigger React Refresh registration)
+                        window.__nexus_require__(path);
+                        
+                        console.log("[HMR] Hot Updated: " + path);
+                    } catch (e) {
+                        console.error("[HMR] Update Failed", e);
+                        window.location.reload();
+                    }
+                } else {
+                    console.log("[HMR] Not accepted. Full Reload.", path);
+                    window.location.reload();
+                    return;
+                }
+            }
         }
     };
     console.log("[HMR] Connected");

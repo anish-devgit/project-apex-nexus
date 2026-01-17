@@ -25,11 +25,20 @@ pub const NEXUS_RUNTIME_JS: &str = r#"
     }
 
     // FIX 2 & 3: Inject module.hot stub and module.id
+    // Week 10: State-Preserving HMR Support
     const module = {
       id: id,
       exports: {},
       hot: {
-        accept: function() {},
+        _accepted: false, // Internal flag for HMR client
+        accept: function(dep, cb) {
+            // Minimal implementation:
+            // If called without args or with self-ID, mark as accepted.
+            if (!dep || dep === id) {
+                this._accepted = true;
+            }
+            // Bubbling not implemented in Week 10
+        },
         dispose: function() {},
         data: null
       }
