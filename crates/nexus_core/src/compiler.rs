@@ -10,6 +10,62 @@ pub struct CompileResult {
     pub sourcemap: Option<String>,
 }
 
+use lightningcss::stylesheet::{StyleSheet, ParserOptions, PrinterOptions};
+
+pub fn compile_css(source: &str, _filename: &str) -> CompileResult {
+    // 1. Parse & Normalize (Validate)
+    // We use lightningcss to ensure valid CSS and normalize output.
+    let sheet_res = StyleSheet::parse(source, ParserOptions::default());
+    
+    let css_content = match sheet_res {
+        Ok(sheet) => {
+            let printer_options = PrinterOptions {
+                minify: false, // Requirement: Do NOT optimize yet
+                source_map: None,
+                ..PrinterOptions::default()
+            };
+            match sheet.to_css(printer_options) {
+                Ok(res) => res.code,
+                Err(_) => source.to_string(), // Fallback
+            }
+        },
+        Err(e) => {
+            tracing::error!("CSS Parse Error in {}: {}", _filename, e);
+            // Fallback to raw source to allow browser to maybe handle/debug
+            source.to_string()
+        }
+    };
+
+    // 2. Wrap in JS Injector
+    // Use serde_json to safely escape the CSS string for inclusion in JS
+    let escaped_css = serde_json::to_string(&css_content).unwrap_or_else(|_| format!("`{}`", css_content));
+
+    let code = format!(r#"
+(function() {{
+    const styleId = "nexus-style-" + module.id;
+    let style = document.getElementById(styleId);
+    if (!style) {{
+      style = document.createElement("style");
+      style.id = styleId;
+      document.head.appendChild(style);
+    }}
+    style.textContent = {};
+
+    if (module.hot) {{
+      module.hot.accept();
+      module.hot.dispose(() => {{
+          style.remove();
+      }});
+    }}
+}})();
+"#, escaped_css);
+
+    CompileResult {
+        code,
+        sourcemap: None,
+    }
+}
+
 pub fn compile(source: &str, filename: &str) -> CompileResult {
     let allocator = Allocator::default();
     let source_type = SourceType::from_path(Path::new(filename)).unwrap_or_default();

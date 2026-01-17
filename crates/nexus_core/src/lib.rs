@@ -17,7 +17,7 @@ use graph::*;
 pub mod parser;
 use parser::extract_dependencies;
 pub mod compiler;
-use compiler::compile;
+use compiler::{compile, compile_css};
 pub mod watcher;
 pub mod resolver;
 use resolver::NexusResolver;
@@ -122,6 +122,10 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
     if is_vendor {
         compiled_code = raw_content;
         sourcemap = None;
+    } else if path_str.ends_with(".css") {
+        let res = compiler::compile_css(&raw_content, path_str);
+        compiled_code = res.code;
+        sourcemap = res.sourcemap;
     } else {
         // Week 8: Compile
         // Use path_str or abs_path? path_str usually sufficient for extension detection.

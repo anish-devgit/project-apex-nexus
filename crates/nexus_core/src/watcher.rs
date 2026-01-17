@@ -43,7 +43,7 @@ pub async fn start_watcher(
                         if s.contains("node_modules") {
                             return false; 
                         }
-                        s.ends_with(".js") || s.ends_with(".ts") || s.ends_with(".jsx") || s.ends_with(".tsx")
+                        s.ends_with(".js") || s.ends_with(".ts") || s.ends_with(".jsx") || s.ends_with(".tsx") || s.ends_with(".css")
                     })
                     .collect();
 
@@ -68,7 +68,11 @@ pub async fn start_watcher(
                         let virt_path = if normalized.starts_with('/') { normalized } else { format!("/{}", normalized) };
 
                         // Week 8: Compile on change
-                        let compiled = crate::compiler::compile(&content, &virt_path);
+                        let compiled = if virt_path.ends_with(".css") {
+                             crate::compiler::compile_css(&content, &virt_path)
+                        } else {
+                             crate::compiler::compile(&content, &virt_path)
+                        };
 
                         // Week 9: Resolve Deps using new Resolver
                         let deps = crate::parser::extract_dependencies(&compiled.code, &virt_path);
