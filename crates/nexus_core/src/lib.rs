@@ -211,6 +211,12 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
         .await
 }
 
+
+// Week 7: Runtime
+pub mod runtime;
+use runtime::NEXUS_RUNTIME_JS;
+use parser::transform_cjs;
+
 async fn handle_chunk(state: AppState, uri: Uri) -> Response {
     let path = uri.path().strip_prefix("/_nexus/chunk").unwrap_or("/");
     let graph = state.graph.read().unwrap();
@@ -224,7 +230,13 @@ async fn handle_chunk(state: AppState, uri: Uri) -> Response {
     
     let mut chunk_content = String::new();
     
-    // Inject HMR Client
+    // 1. Inject Runtime
+    chunk_content.push_str(NEXUS_RUNTIME_JS);
+    chunk_content.push('\n');
+
+    // 2. Inject HMR Client (Week 6) - We keep this for reloading
+    // Note: In a real linker, HMR client would also be a module.
+    // For now, we append it as a global script side-effect.
     chunk_content.push_str(&format!(r#"
 (function() {{
     const chunkPath = "{}";
@@ -239,12 +251,26 @@ async fn handle_chunk(state: AppState, uri: Uri) -> Response {
 }})();
 "#, path));
 
+    // 3. Emit Wrapped Modules
     for id in sorted_ids {
         if let Some(module) = graph.modules.get(id.0) {
-            chunk_content.push_str(&format!("/* Module: {} */\n", module.path));
-            chunk_content.push_str(&module.source);
-            chunk_content.push('\n');
+            // A. Transform Imports (ESM -> CJS)
+            let transformed_source = transform_cjs(&module.source, &module.path);
+            
+            // B. Wrap in Registry
+            // __nexus_register__("path", function(require, module, exports) { ... })
+            chunk_content.push_str(&format!(
+                "__nexus_register__(\"{}\", function(require, module, exports) {{\n// Source: {}\n{}\n}});\n",
+                module.path,
+                module.path,
+                transformed_source
+            ));
         }
+    }
+    
+    // 4. Bootstrap Entry
+    if let Some(entry_module) = graph.modules.get(root_id.0) {
+         chunk_content.push_str(&format!("__nexus_require__(\"{}\");", entry_module.path));
     }
     
     let mut headers = HeaderMap::new();
@@ -252,6 +278,7 @@ async fn handle_chunk(state: AppState, uri: Uri) -> Response {
     
     (StatusCode::OK, headers, chunk_content).into_response()
 }
+
 
 async fn handle_ws(
     ws: axum::extract::ws::WebSocketUpgrade,
