@@ -111,12 +111,18 @@ pub async fn start_watcher(
                         let normalized = relative.replace('\\', "/");
                         let virt_path = if normalized.starts_with('/') { normalized } else { format!("/{}", normalized) };
 
+                        // Week 8: Compile on change
+                        let compiled = crate::compiler::compile(&content, &virt_path);
+
                         // Update Graph
                         let mut roots_to_reload = Vec::new();
                         {
                             let mut g = graph.write().unwrap();
                             if let Some(id) = g.find_by_path(&virt_path) {
-                                g.update_source(id, &content);
+                                // Append SourceMap URL
+                                let final_content = format!("{}\n//# sourceMappingURL=/_nexus/sourcemap/{}", compiled.code, id.0);
+                                
+                                g.update_compiled(id, &final_content, compiled.sourcemap);
                                 
                                 // Now find roots (using updated graph structure? No, strictly structure is same if we don't reparse)
                                 // We use existing edges.
@@ -130,7 +136,7 @@ pub async fn start_watcher(
                         }
                         
                         if !roots_to_reload.is_empty() {
-                             tracing::info!("Reloading chunks: {:?}", roots_to_reload);
+                             tracing::info!("File Changed & Compiled. Reloading chunks: {:?}", roots_to_reload);
                              let _ = tx.send(HmrMessage { paths: roots_to_reload });
                         }
                      }

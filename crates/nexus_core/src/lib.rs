@@ -16,6 +16,8 @@ pub mod graph;
 use graph::*;
 pub mod parser;
 use parser::extract_dependencies;
+pub mod compiler;
+use compiler::compile;
 pub mod watcher;
 
 // --- DATA STRUCTURES ---
@@ -34,6 +36,21 @@ async fn handle_module(
     uri: Uri,
 ) -> impl IntoResponse {
     handle_module_logic(state, uri).await
+}
+
+async fn handle_sourcemap(
+    State(state): State<AppState>,
+    Path(id): Path<usize>,
+) -> Response {
+    let graph = state.graph.read().unwrap();
+    if let Some(module) = graph.modules.get(id) {
+        if let Some(map) = &module.map {
+             let mut headers = HeaderMap::new();
+             headers.insert("Content-Type", "application/json".parse().unwrap());
+             return (StatusCode::OK, headers, map.clone()).into_response();
+        }
+    }
+    (StatusCode::NOT_FOUND, "Sourcemap not found").into_response()
 }
 
 fn resolve_import(base_path: &str, import_spec: &str) -> String {
@@ -55,17 +72,7 @@ fn resolve_import(base_path: &str, import_spec: &str) -> String {
         }
     }
     
-    // Ensure it starts with / 
     let s = normalized.to_string_lossy().to_string();
-    if !s.starts_with('/') && !s.starts_with('\\') { // windows?
-         // On windows joined might be `\src\utils.js`.
-         // We want slash consistency? 
-         // The `uri.path()` usually has forward slashes.
-         // `Path` operations might use backslashes on Windows.
-         // Let's force forward slashes for the Graph IDs to be consistent with Uris.
-         // `to_string_lossy` uses native.
-         // We should replace `\` with `/`.
-    }
     s.replace('\\', "/")
 }
 
@@ -89,7 +96,7 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
     let abs_path = std::path::Path::new(&state.root_dir).join(&safe_path);
 
     // FIX 1: Non-blocking I/O
-    let content = match tokio::fs::read_to_string(&abs_path).await {
+    let raw_content = match tokio::fs::read_to_string(&abs_path).await {
         Ok(c) => c,
         Err(e) => {
             tracing::error!("Failed to read file {}: {}", abs_path.display(), e);
@@ -97,22 +104,33 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
         }
     };
 
-    // Week 4: Extract Dependencies
-    let deps = extract_dependencies(&content, path_str);
+    // Week 8: Compile
+    let compiled = compile(&raw_content, path_str);
+
+    // Week 4: Extract Dependencies (from compiled ESM JS)
+    let deps = extract_dependencies(&compiled.code, path_str);
+
+    let final_content;
+    let module_id;
 
     {
         let mut graph = state.graph.write().unwrap();
         
-        // Find existing module by path or add new
-        // The path in graph should probably match the request path (path_str) for identification
         let id_opt = graph.find_by_path(path_str);
         
         let current_id = if let Some(id) = id_opt {
-            graph.update_source(id, &content);
             id
         } else {
-            graph.add_module(path_str, &content)
+            // Add with placeholder
+            graph.add_module(path_str, "")
         };
+        module_id = current_id;
+
+        // Append SourceMap URL
+        final_content = format!("{}\n//# sourceMappingURL=/_nexus/sourcemap/{}", compiled.code, current_id.0);
+        
+        // Update Graph with compiled source and map
+        graph.update_compiled(current_id, &final_content, compiled.sourcemap);
         
         // Populate dependencies
         for dep_spec in deps {
@@ -132,7 +150,7 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
         }
         
         let count = graph.modules.len();
-        tracing::info!("Graph Node Updated/Created. Total Nodes: {}", count);
+        tracing::info!("Graph Node compile update. Total Nodes: {}", count);
     }
 
     // FIX 3: Header Consistency
@@ -140,7 +158,7 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
     headers.insert("X-Apex-Intercept", "true".parse().unwrap());
     headers.insert("Content-Type", "application/javascript".parse().unwrap());
 
-    (StatusCode::OK, headers, content).into_response()
+    (StatusCode::OK, headers, final_content).into_response()
 }
 
 // --- SERVER ---
@@ -195,8 +213,10 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
 
     let app = Router::new()
         .route("/ws", get(handle_ws))
+        .route("/_nexus/sourcemap/:id", get(handle_sourcemap))
         .fallback_service(service)
         .layer(TraceLayer::new_for_http());
+
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     

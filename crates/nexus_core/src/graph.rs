@@ -6,6 +6,7 @@ pub struct Module {
     pub id: ModuleId,
     pub path: String,
     pub source: String,
+    pub map: Option<String>,
     pub version: u64,
 }
 
@@ -31,6 +32,7 @@ impl ModuleGraph {
             id,
             path: path.to_string(),
             source: source.to_string(),
+            map: None,
             version: 1,
         };
         self.modules.push(module);
@@ -63,6 +65,14 @@ impl ModuleGraph {
     pub fn update_source(&mut self, id: ModuleId, new_source: &str) {
         if let Some(module) = self.modules.get_mut(id.0) {
             module.source = new_source.to_string();
+            module.version += 1;
+        }
+    }
+
+    pub fn update_compiled(&mut self, id: ModuleId, compiled_source: &str, map: Option<String>) {
+        if let Some(module) = self.modules.get_mut(id.0) {
+            module.source = compiled_source.to_string();
+            module.map = map;
             module.version += 1;
         }
     }
