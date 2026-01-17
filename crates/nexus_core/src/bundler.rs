@@ -2,7 +2,7 @@ use std::collections::{HashSet, VecDeque, HashMap};
 use std::path::{Path, PathBuf};
 use crate::resolver::NexusResolver;
 use crate::compiler;
-use crate::parser::{extract_dependencies_detailed, transform_cjs};
+use crate::parser::{analyze_module, transform_tree_shake, transform_cjs, ImportInfo};
 use crate::runtime::NEXUS_RUNTIME_JS;
 
 struct BuildNode {
@@ -10,11 +10,13 @@ struct BuildNode {
     fs_path: PathBuf,
     code: String, // Compiled JS
     is_vendor: bool,
-    imports: HashMap<String, String>, // Import Specifier -> Resolved Virtual ID
+    imports: HashMap<String, String>, // Import Source -> Resolved Virtual ID
     sync_deps: Vec<String>, // Resolved Virtual IDs
     async_deps: Vec<String>, // Resolved Virtual IDs
     css: Option<String>,
     asset: Option<(String, Vec<u8>)>,
+    exports: Vec<String>,
+    import_info: Vec<ImportInfo>,
 }
 
 struct Chunk {
@@ -24,7 +26,7 @@ struct Chunk {
 }
 
 pub async fn build(root_dir: &str) -> std::io::Result<()> {
-    tracing::info!("Starting Production Build with Code Splitting...");
+    tracing::info!("Starting Production Build with Tree Shaking...");
     let root = Path::new(root_dir);
     let dist = root.join("dist");
     let assets_dir = dist.join("assets");
@@ -101,18 +103,24 @@ pub async fn build(root_dir: &str) -> std::io::Result<()> {
         let mut sync_deps = Vec::new();
         let mut async_deps = Vec::new();
         let mut imports_map = HashMap::new();
+        let mut exports = Vec::new();
+        let mut import_info = Vec::new();
 
         if ext != "css" && !matches!(ext, "png" | "jpg" | "jpeg" | "gif" | "svg" | "wasm") {
-            let deps = extract_dependencies_detailed(&compiled.code, &virtual_id);
-            for (spec, is_dynamic) in deps {
-                if let Ok(resolved) = resolver.resolve(&current_path.parent().unwrap(), &spec) {
+            let (ex, im) = analyze_module(&compiled.code, &virtual_id);
+            exports = ex;
+            import_info = im;
+            
+            for info in &import_info {
+                if let Ok(resolved) = resolver.resolve(&current_path.parent().unwrap(), &info.source) {
                     let resolved_vid = normalize_id(&resolved);
                     
-                    imports_map.insert(spec, resolved_vid.clone());
+                    imports_map.insert(info.source.clone(), resolved_vid.clone());
 
-                    if is_dynamic {
+                    if info.is_dynamic {
                         async_deps.push(resolved_vid.clone());
                     } else {
+                        // is_star (export * or import *) is treated as sync dependency usually
                         sync_deps.push(resolved_vid.clone());
                     }
 
@@ -135,69 +143,124 @@ pub async fn build(root_dir: &str) -> std::io::Result<()> {
             async_deps,
             css: compiled.css,
             asset: compiled.asset,
+            exports,
+            import_info,
         });
     }
 
-    // 4. Partitioning / Chunking
-    // Strategy:
-    // - Walk Sync graph from Entry -> Main Chunk
-    // - Identify Async Edges (from node inside Main Chunk or Async Chunk).
-    // - Each Async Target starts a new Chunk.
-    // - Shared Logic: If a node is reachable from entry and async, keep in entry?
-    //   If reachable from multiple async, put in shared?
-    //   Simple MVP:
-    //     - Assign every node to 'Entry' initially if reachable sync.
-    //     - Then find Async roots. Assign their subgraphs to Async chunks.
-    //     - BUT "No duplicate code". Only visit *unvisited* nodes?
-    //     - Yes. Code Splitting: if module already loaded by Entry, Async chunk shouldn't include it.
-    //     - So: 1. BFS Entry (Sync). Mark all as Main Bundle.
-    //           2. Identify Async Deps from Main Bundle nodes. Queue them as Async Roots.
-    //           3. Process Async Roots. BFS (Sync) from them.
-    //              If node already assigned (to Main or other Async), LINK it (dep) but DON'T include code.
-    //              If node unassigned, assign to current Async Chunk.
-    //     - This creates a waterfall.
-    
-    let mut module_chunk_map: HashMap<String, String> = HashMap::new(); // mod_id -> chunk_name
+    // 4. Liveness Analysis (Mark & Sweep)
+    let mut used_exports: HashMap<String, HashSet<String>> = HashMap::new();
+    let mut live_modules = VecDeque::new();
+    let mut visited_live = HashSet::new();
+
+    // Start with Entry
+    live_modules.push_back(entry_virtual_id.clone());
+    visited_live.insert(entry_virtual_id.clone());
+
+    while let Some(mid) = live_modules.pop_front() {
+        if let Some(node) = nodes.get(&mid) {
+            // Process Imports
+            for info in &node.import_info {
+                if let Some(resolved_id) = node.imports.get(&info.source) {
+                    // Mark target module as Live
+                    if !visited_live.contains(resolved_id) {
+                        visited_live.insert(resolved_id.clone());
+                        live_modules.push_back(resolved_id.clone());
+                    }
+
+                    // Mark explicitly requested exports as Used
+                    let entry_set = used_exports.entry(resolved_id.clone()).or_default();
+                    for spec in &info.specifiers {
+                        entry_set.insert(spec.clone());
+                    }
+                    
+                    // If import * or export *, mark ALL as used?
+                    // Safe logic: If I `import * as ns`, I might use any key. 
+                    // So we must verify ALL exports.
+                    // Also `export * from 'mod'` usage is propagated later.
+                    // But here, if we encounter `import *`, we optimistically mark all.
+                    if info.is_star && !info.specifiers.is_empty() { 
+                         // `import * as ns` (specifier is `ns`? No, visitor logic) 
+                         // Visitor: `import *` sets `is_star=true` and NO specifiers?
+                         // Re-check parser.rs:
+                         // ImportNamespaceSpecifier -> `is_star = true`. specifiers empty?
+                         // "specifiers.push(s.imported.name())" was logic for ImportSpecifier.
+                         // ImportNamespaceSpecifier logic: `is_star=true`. Specifiers list left empty?
+                         // Yes.
+                         // So if `is_star`, we treat it as "Uses Everything".
+                         if let Some(target) = nodes.get(resolved_id) {
+                             for e in &target.exports {
+                                 entry_set.insert(e.clone());
+                             }
+                         }
+                    }
+                }
+            }
+        }
+    }
+
+    // Propagate `export *` usage
+    // If A uses `x` from B, and B has `export * from C`.
+    // If B doesn't export `x` directly, `x` might come from C.
+    // So we add `x` to C.used.
+    let mut changed = true;
+    while changed {
+        changed = false;
+        let mut updates: Vec<(String, String)> = Vec::new();
+        
+        for (mid, node) in &nodes {
+            if let Some(used) = used_exports.get(mid) {
+                // Check if any used symbol is NOT in local exports (handled by export *) 
+                // OR simpler: Just propagate ALL used symbols to all `export *` children.
+                // This is over-approximation but safe.
+                for info in &node.import_info {
+                     // export * from ... -> is_star=true, specifiers empty?
+                     // Visitor: `visit_export_all_declaration` -> `is_star=true`, specifiers empty.
+                     if info.is_star && info.specifiers.is_empty() {
+                         if let Some(child_id) = node.imports.get(&info.source) {
+                             // Propagate all used symbols
+                             for sym in used {
+                                 updates.push((child_id.clone(), sym.clone()));
+                             }
+                         }
+                     }
+                }
+            }
+        }
+        
+        for (child, sym) in updates {
+            let entry = used_exports.entry(child).or_default();
+            if entry.insert(sym) {
+                changed = true;
+            }
+        }
+    }
+
+    // 5. Partitioning / Chunking
+    let mut module_chunk_map: HashMap<String, String> = HashMap::new(); 
     let mut chunks: Vec<Chunk> = Vec::new();
     let mut chunk_queue = VecDeque::new();
     
     // Entry Chunk
     chunk_queue.push_back((entry_virtual_id.clone(), "main.js".to_string(), true));
     
-    // We iterate chunks.
-    // Be careful: async deps can appear ANYWHERE.
-    // We need to scan assigned modules for async edges to spawn new chunks.
-    // Better: Global Queue of (root_mod, chunk_name).
-    
     while let Some((root_id, chunk_name, is_entry)) = chunk_queue.pop_front() {
-        // Create Chunk
         let mut chunk_modules = Vec::new();
         let mut bfs = VecDeque::new();
         bfs.push_back(root_id);
         
         while let Some(curr) = bfs.pop_front() {
-            if module_chunk_map.contains_key(&curr) {
-                // Already in a chunk.
-                // If in THIS chunk, ignore.
-                // If in OTHER chunk, it's a shared dep (already loaded or parallel).
-                // Existing presence implies we don't need to bundle it again here.
-                continue;
-            }
+            if module_chunk_map.contains_key(&curr) { continue; }
             
-            // Assign to this chunk
             module_chunk_map.insert(curr.clone(), chunk_name.clone());
             chunk_modules.push(curr.clone());
             
             if let Some(node) = nodes.get(&curr) {
-                // Follow SYNC deps
                 for dep in &node.sync_deps {
                     bfs.push_back(dep.clone());
                 }
-                
-                // Identify ASYNC deps -> Spawn new chunks
                 for async_dep in &node.async_deps {
                     if !module_chunk_map.contains_key(async_dep) {
-                        // Create name: chunk-[hash/id].js
                         let name = format!("chunk-{}.js", async_dep.replace("/", "-").trim_start_matches('-'));
                         chunk_queue.push_back((async_dep.clone(), name, false));
                     }
@@ -214,15 +277,8 @@ pub async fn build(root_dir: &str) -> std::io::Result<()> {
         }
     }
     
-    // 5. Vendor Extraction
-    // Move "is_vendor" modules from their chunks to "vendor.js", UNLESS it breaks strict async isolation?
-    // Actually, "vendor.js" usually loaded upfront.
-    // If we move ALL vendors to `vendor.js` and load it in index.html, it's available globally.
-    // So we can safely move any module with `is_vendor=true` to `vendor.js`.
-    
+    // 6. Vendor Extraction
     let mut vendor_modules = Vec::new();
-    
-    // Filter out vendors from chunks
     for chunk in &mut chunks {
         let (vendors, app): (Vec<_>, Vec<_>) = chunk.modules.drain(..).partition(|id| {
             nodes.get(id).map(|n| n.is_vendor).unwrap_or(false)
@@ -234,19 +290,8 @@ pub async fn build(root_dir: &str) -> std::io::Result<()> {
             }
         }
     }
-    // Note: This naive vendor extraction removes dupes if same vendor in multiple async chunks.
-    
-    // 6. Build Mapping for Runtime
-    // Map: Async Module ID -> Chunk Name
-    // We iterate all nodes. If node matches an Async Root target, we put key.
-    // Async Roots were those referenced in `async_deps`.
-    // Actually, simple map: Any module whose Chunk is NOT main?
-    // No, `__nexus_import__("/src/foo")` needs to know which file to fetch.
-    // If `/src/foo` is in `chunk-foo.js`. Map: `"/src/foo": "/assets/chunk-foo.js"`.
-    // If `/src/bar` is ALSO in `chunk-foo.js`. Map: `"/src/bar": "/assets/chunk-foo.js"`.
-    // So map ALL modules in async chunks?
-    // YES.
-    
+
+    // 7. Build Mapping for Runtime
     let mut nexus_chunk_map = HashMap::new();
     for chunk in &chunks {
         if !chunk.is_entry {
@@ -255,14 +300,10 @@ pub async fn build(root_dir: &str) -> std::io::Result<()> {
             }
         }
     }
-    // Also include vendors? Vendors are loaded via script tag generally (vendor.js).
-    // If an async chunk depends on a vendor not yet loaded... but vendors are global.
-    // We assume vendor.js loaded.
     
-    // 7. Emit Bundles
+    // 8. Emit Bundles (With Tree Shaking)
     let mut css_bundle = String::new();
     
-    // Assets & CSS aggregation
     for node in nodes.values() {
         if let Some(css) = &node.css {
             css_bundle.push_str(css);
@@ -273,40 +314,44 @@ pub async fn build(root_dir: &str) -> std::io::Result<()> {
         }
     }
 
-    // Vendor Bundle
+    // Helper to process code
+    let fallback_set = HashSet::new();
+    let process_code = |mid: &str| -> String {
+        if let Some(node) = nodes.get(mid) {
+            let used = used_exports.get(mid).unwrap_or(&fallback_set);
+            
+            // 1. Tree Shake
+            let shaken = transform_tree_shake(&node.code, &node.id, used);
+            
+            // 2. Transform CJS
+            let transformed = transform_cjs(&shaken, &node.id, &node.imports);
+            
+            return format!(
+                "__nexus_register__(\"{}\", function(require, module, exports) {{\n// Using: {:?}\n{}\n}});\n",
+                node.id, used, transformed
+            );
+        }
+        "".to_string()
+    };
+
     let mut vendor_code = String::new();
     vendor_code.push_str(NEXUS_RUNTIME_JS);
     vendor_code.push('\n');
     for vid in &vendor_modules {
-        if let Some(node) = nodes.get(vid) {
-            let transformed = transform_cjs(&node.code, &node.id, &node.imports);
-            vendor_code.push_str(&format!(
-                "__nexus_register__(\"{}\", function(require, module, exports) {{\n{}\n}});\n",
-                node.id, transformed
-            ));
-        }
+        vendor_code.push_str(&process_code(vid));
     }
 
-    // Chunks
     for chunk in chunks {
         let mut code = String::new();
         for mid in &chunk.modules {
-            if let Some(node) = nodes.get(mid) {
-                let transformed = transform_cjs(&node.code, &node.id, &node.imports);
-                code.push_str(&format!(
-                    "__nexus_register__(\"{}\", function(require, module, exports) {{\n{}\n}});\n",
-                    node.id, transformed
-                ));
-            }
+            code.push_str(&process_code(mid));
         }
         
         if chunk.is_entry {
-            // Inject Chunk Map
             if !nexus_chunk_map.is_empty() {
                 let map_json = serde_json::to_string(&nexus_chunk_map).unwrap();
                 code.push_str(&format!("\nwindow.__nexus_chunk_map__ = {};\n", map_json));
             }
-            // Bootstrap
             code.push_str(&format!("\n__nexus_require__(\"{}\");\n", entry_virtual_id));
         }
         
@@ -316,7 +361,7 @@ pub async fn build(root_dir: &str) -> std::io::Result<()> {
     tokio::fs::write(assets_dir.join("vendor.js"), vendor_code).await?;
     tokio::fs::write(assets_dir.join("style.css"), css_bundle).await?;
     
-    // 8. HTML
+    // 9. HTML
      let html_path = root.join("index.html");
      let tags = r#"
     <link rel="stylesheet" href="/assets/style.css">
