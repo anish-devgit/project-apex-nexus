@@ -1,0 +1,13 @@
+{
+  "name": "nexus-cli",
+  "version": "0.1.0",
+  "description": "CLI for Nexus Build OS",
+  "bin": {
+    "nexus": "./bin/nexus.js"
+  },
+  "scripts": {
+    "dev": "echo 'Not implemented'",
+    "build": "echo 'Not implemented'"
+  },
+  "license": "Apache-2.0"
+}

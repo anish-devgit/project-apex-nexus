@@ -1,0 +1,13 @@
+[package]
+name = "nexus_kernel"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "0.7", features = ["ws"] }
+tokio = { version = "1", features = ["full"] }
+oxc_parser = "0.9"
+oxc_allocator = "0.9"
+oxc_span = "0.9"
+serde = { version = "1.0", features = ["derive"] }
+# Add other deps as needed
