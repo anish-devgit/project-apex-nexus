@@ -4,85 +4,119 @@ use oxc_span::SourceType;
 use oxc_ast::ast::{ModuleDeclaration, ImportDeclarationSpecifier}; // Adjust based on exact structure if needed
 
 
+use oxc_ast::visit::Visit;
+use oxc_ast::ast::*;
+
+struct DependencyVisitor {
+    deps: Vec<(String, bool)>, 
+}
+
+impl<'a> Visit<'a> for DependencyVisitor {
+    fn visit_import_expression(&mut self, expr: &ImportExpression<'a>) {
+        if let Expression::StringLiteral(s) = &expr.source {
+            self.deps.push((s.value.to_string(), true));
+        }
+        // Recurse for arguments
+        for arg in &expr.arguments {
+             self.visit_expression(arg);
+        }
+        // Recurse source
+        self.visit_expression(&expr.source);
+    }
+
+    fn visit_import_declaration(&mut self, decl: &ImportDeclaration<'a>) {
+         self.deps.push((decl.source.value.to_string(), false));
+    }
+    
+    fn visit_export_all_declaration(&mut self, decl: &ExportAllDeclaration<'a>) {
+        self.deps.push((decl.source.value.to_string(), false));
+    }
+    
+    fn visit_export_named_declaration(&mut self, decl: &ExportNamedDeclaration<'a>) {
+        if let Some(source) = &decl.source {
+             self.deps.push((source.value.to_string(), false));
+        }
+    }
+}
+
 pub fn extract_dependencies(source: &str, path: &str) -> Vec<String> {
+    extract_dependencies_detailed(source, path).into_iter().map(|(s, _)| s).collect()
+}
+
+pub fn extract_dependencies_detailed(source: &str, path: &str) -> Vec<(String, bool)> {
     let allocator = Allocator::default();
     let source_type = SourceType::from_path(path).unwrap_or_default();
-    
     let ret = Parser::new(&allocator, source, source_type).parse();
     
-    // Log parsing errors but don't fail
     if !ret.errors.is_empty() {
         tracing::warn!("Parsing errors in {}: {:?}", path, ret.errors);
     }
+    
+    let mut visitor = DependencyVisitor { deps: Vec::new() };
+    visitor.visit_program(&ret.program);
+    visitor.deps
+}
 
-    let program = ret.program;
-    let mut deps = Vec::new();
+struct DynamicImportRewriter<'b> {
+    imports: &'b std::collections::HashMap<String, String>,
+    replacements: Vec<(u32, u32, String)>,
+}
 
-    for stmt in program.body {
-        if let oxc_ast::ast::Statement::ModuleDeclaration(decl) = stmt {
-            match decl.0 {
-                ModuleDeclaration::ImportDeclaration(import_decl) => {
-                    deps.push(import_decl.source.value.to_string());
-                }
-                ModuleDeclaration::ExportAllDeclaration(export_all) => {
-                    deps.push(export_all.source.value.to_string());
-                }
-                ModuleDeclaration::ExportNamedDeclaration(export_named) => {
-                    if let Some(source) = export_named.source {
-                         deps.push(source.value.to_string());
-                    }
-                }
-                _ => {}
-            }
-        }
+impl<'a, 'b> Visit<'a> for DynamicImportRewriter<'b> {
+    fn visit_import_expression(&mut self, expr: &ImportExpression<'a>) {
+         if let Expression::StringLiteral(s) = &expr.source {
+             let source_val = s.value.as_str();
+             let resolved = self.imports.get(source_val).cloned().unwrap_or_else(|| source_val.to_string());
+             
+             let start = expr.span.start;
+             let end = expr.span.end;
+             
+             self.replacements.push((start, end, format!("__nexus_import__(\"{}\")", resolved)));
+         }
+         
+         self.visit_expression(&expr.source);
+         for arg in &expr.arguments {
+             self.visit_expression(arg);
+         }
     }
-
-    deps
 }
 
 pub fn transform_cjs(source: &str, path: &str, imports: &std::collections::HashMap<String, String>) -> String {
-    // Naive implementation for Week 7 (MVP)
-    // In a real implementation we would distinct Source text spans and replace them.
-    // However, oxc doesn't have a "Mutation" API easily accessible without re-printing.
-    // For Week 7, we will do string replacement based on AST spans? 
-    // Or just simple regex for MVP as allowed by "Minimal"?
-    // "Implementation Note for Rust: Use oxc_parser to identify ... Use a simple span replacement".
-    
     let allocator = Allocator::default();
     let source_type = SourceType::from_path(path).unwrap_or_default();
     let ret = Parser::new(&allocator, source, source_type).parse();
     
     if !ret.errors.is_empty() {
-        return source.to_string(); // Fallback on error
+        return source.to_string();
     }
 
-    let mut replacements: Vec<(u32, u32, String)> = Vec::new();
     let program = ret.program;
+    let mut replacements: Vec<(u32, u32, String)> = Vec::new();
 
-    for stmt in program.body {
+    // 1. Dynamic Imports (Visitor)
+    let mut visitor = DynamicImportRewriter {
+        imports,
+        replacements: Vec::new(),
+    };
+    visitor.visit_program(&program);
+    replacements.extend(visitor.replacements);
+
+    // 2. Declarations (Loop)
+    for stmt in &program.body {
         if let oxc_ast::ast::Statement::ModuleDeclaration(decl) = stmt {
-             match decl.0 {
+             match &decl.0 {
                 ModuleDeclaration::ImportDeclaration(import_decl) => {
                      // import "pkg" -> require("pkg")
-                     // import x from "./file" -> const x = require("./file").default
-                     // Span: import_decl.span
                      let start = import_decl.span.start;
                      let end = import_decl.span.end;
                      let source_val = import_decl.source.value.as_str();
                      
-                     // Resolve specifier
                      let resolved = imports.get(source_val).cloned().unwrap_or_else(|| source_val.to_string());
                      
                      if let Some(specifiers) = &import_decl.specifiers {
                          if specifiers.is_empty() {
-                             // import "pkg"
                              replacements.push((start, end, format!("require(\"{}\");", resolved)));
                          } else {
-                             // import x from "..."
-                             // Identify default import vs named.
-                             // Week 7 Assumption: "Treat imports as value copies".
-                             // import x from "./file" -> const x = require("./file").default
-                             
                              let mut decls = Vec::new();
                              for spec in specifiers {
                                  match spec {
@@ -97,7 +131,6 @@ pub fn transform_cjs(source: &str, path: &str, imports: &std::collections::HashM
                                      ImportDeclarationSpecifier::ImportSpecifier(s) => {
                                           let local = s.local.name.as_str();
                                           let imported = s.imported.name().as_str();
-                                          // import { x } from "..." -> const x = require("...").x
                                           decls.push(format!("const {} = require(\"{}\").{};", local, resolved, imported));
                                      }
                                  }
@@ -107,30 +140,13 @@ pub fn transform_cjs(source: &str, path: &str, imports: &std::collections::HashM
                      }
                 }
                 ModuleDeclaration::ExportDefaultDeclaration(export_default) => {
-                    // export default ...
-                    // If declaration is expression: exports.default = ...
                     let start = export_default.span.start;
-                    let end = export_default.span.end; // This might capture the whole declaration
                     
                     match &export_default.declaration {
                          oxc_ast::ast::ExportDefaultDeclarationKind::Expression(expr) => {
-                              // We want to replace "export default " (prefix) with "exports.default = "
-                              // But we need to keep the expression.
-                              // Simple span replacement of the whole thing:
-                              // "exports.default = <expression source>"
-                              
-                              // We need the source text of the expression to preserve it?
-                              // Or simply replace the "export default" keyword part?
-                              // `export_default.span` covers the whole statement.
-                              // `expr.span` covers the expression.
-                              // Replace [start, expr.span.start) with "exports.default = ".
                               replacements.push((start, expr.span.start, "exports.default = ".to_string()));
                          }
                          _ => {
-                              // Function declaration etc.
-                              // export default function foo() {}
-                              // -> exports.default = function foo() {}
-                              // similar logic.
                                match &export_default.declaration {
                                    oxc_ast::ast::ExportDefaultDeclarationKind::FunctionDeclaration(f) => {
                                        replacements.push((start, f.span.start, "exports.default = ".to_string()));
@@ -144,20 +160,16 @@ pub fn transform_cjs(source: &str, path: &str, imports: &std::collections::HashM
                     }
                 }
                 ModuleDeclaration::ExportNamedDeclaration(export_named) => {
-                    // export const x = 1; -> const x = 1; Object.defineProperty...
-                    // export { x }; -> Object.defineProperty...
-                    
                     let start = export_named.span.start;
                     
                     if let Some(decl) = &export_named.declaration {
                         let mut names = Vec::new();
-                        let mut decl_start = start; // Default to start, update based on decl type
+                        let mut decl_start = start;
                         
                         match decl {
                             oxc_ast::ast::Declaration::VariableDeclaration(var_decl) => {
                                 decl_start = var_decl.span.start;
                                 for d in &var_decl.declarations {
-                                     // Simple Identifier support
                                      if let oxc_ast::ast::BindingPatternKind::BindingIdentifier(id) = &d.id.kind {
                                          names.push(id.name.as_str().to_string());
                                      }
@@ -179,19 +191,14 @@ pub fn transform_cjs(source: &str, path: &str, imports: &std::collections::HashM
                         }
                         
                         if !names.is_empty() {
-                            // Remove "export " keyword
                             replacements.push((start, decl_start, "".to_string()));
-                            
-                            // Append DefineProperty calls
                             let defines: Vec<String> = names.into_iter().map(|name| {
                                 format!("Object.defineProperty(exports, \"{}\", {{ enumerable: true, get: function() {{ return {}; }} }});", name, name)
                             }).collect();
-                            
                             replacements.push((export_named.span.end, export_named.span.end, format!("\n{}", defines.join("\n"))));
                         }
                         
                     } else if !export_named.specifiers.is_empty() {
-                         // export { x }
                          let mut defines = Vec::new();
                          for spec in &export_named.specifiers {
                              let exported = spec.exported.name().as_str();
@@ -206,7 +213,7 @@ pub fn transform_cjs(source: &str, path: &str, imports: &std::collections::HashM
         }
     }
 
-    // Apply replacements in reverse order to keep indices valid
+    // Apply
     replacements.sort_by(|a, b| b.0.cmp(&a.0));
     
     let mut result = source.to_string();

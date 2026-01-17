@@ -2,12 +2,29 @@ use std::collections::{HashSet, VecDeque, HashMap};
 use std::path::{Path, PathBuf};
 use crate::resolver::NexusResolver;
 use crate::compiler;
-use crate::parser::extract_dependencies;
+use crate::parser::{extract_dependencies_detailed, transform_cjs};
 use crate::runtime::NEXUS_RUNTIME_JS;
-use tokio::io::AsyncWriteExt;
+
+struct BuildNode {
+    id: String, // Virtual Path (e.g. /src/utils.ts)
+    fs_path: PathBuf,
+    code: String, // Compiled JS
+    is_vendor: bool,
+    imports: HashMap<String, String>, // Import Specifier -> Resolved Virtual ID
+    sync_deps: Vec<String>, // Resolved Virtual IDs
+    async_deps: Vec<String>, // Resolved Virtual IDs
+    css: Option<String>,
+    asset: Option<(String, Vec<u8>)>,
+}
+
+struct Chunk {
+    name: String,
+    modules: Vec<String>, // List of virtual IDs
+    is_entry: bool,
+}
 
 pub async fn build(root_dir: &str) -> std::io::Result<()> {
-    tracing::info!("Starting Production Build...");
+    tracing::info!("Starting Production Build with Code Splitting...");
     let root = Path::new(root_dir);
     let dist = root.join("dist");
     let assets_dir = dist.join("assets");
@@ -33,46 +50,39 @@ pub async fn build(root_dir: &str) -> std::io::Result<()> {
     }
 
     if !found_entry {
-        tracing::error!("No entry point found (checked src/main.tsx, src/index.tsx)");
         return Err(std::io::Error::new(std::io::ErrorKind::NotFound, "Entry point not found"));
     }
 
-    tracing::info!("Entry point: {:?}", entry_abs);
-
-    // 3. Traversal
-    let mut visited = HashSet::new();
+    // 3. Build Graph
+    let mut nodes: HashMap<String, BuildNode> = HashMap::new();
     let mut queue = VecDeque::new();
-    
-    // Modules storage
-    struct BuildModule {
-        id: String,
-        code: String,
-        is_vendor: bool,
-    }
-    
-    let mut modules = Vec::new();
-    let mut css_bundle = String::new();
-    
-    // Initial enqueue
-    // We use absolute path as canonical ID
+    let mut visited_paths = HashSet::new();
+
+    // Canonical ID for entry
     let entry_str = entry_abs.to_string_lossy().to_string();
     queue.push_back(entry_abs.clone());
-    visited.insert(entry_str.clone());
+    visited_paths.insert(entry_str);
+
+    let normalize_id = |p: &Path| -> String {
+        let s = p.to_string_lossy().to_string();
+        let rel = s.replace(root.to_string_lossy().as_ref(), "").replace("\\", "/");
+        if rel.starts_with('/') { rel } else { format!("/{}", rel) }
+    };
+    
+    let entry_virtual_id = normalize_id(&entry_abs);
 
     while let Some(current_path) = queue.pop_front() {
-        let path_str = current_path.to_string_lossy().to_string();
-        let relative_path = path_str.replace(root.to_string_lossy().as_ref(), "").replace("\\", "/"); 
-        // Ensure leading slash for virtual ID
-        let virtual_id = if relative_path.starts_with('/') { relative_path.clone() } else { format!("/{}", relative_path) };
-        
-        let is_vendor = path_str.contains("node_modules");
+        let virtual_id = normalize_id(&current_path);
 
-        // Read
+        if nodes.contains_key(&virtual_id) {
+            continue;
+        }
+
         let bytes = tokio::fs::read(&current_path).await?;
-        
-        // Compile (is_prod = true)
         let ext = current_path.extension().and_then(|s| s.to_str()).unwrap_or("");
-        
+        let is_vendor = current_path.to_string_lossy().contains("node_modules");
+
+        // Compile
         let compiled = match ext {
              "css" => {
                  let text = String::from_utf8_lossy(&bytes);
@@ -87,106 +97,245 @@ pub async fn build(root_dir: &str) -> std::io::Result<()> {
              }
         };
 
-        // Handle Outputs
-        if let Some(css) = compiled.css {
-            css_bundle.push_str(&css);
-            css_bundle.push('\n');
-        }
-        
-        if let Some((name, data)) = compiled.asset {
-            let out = dist.join(&name);
-            tokio::fs::write(&out, &data).await?;
-        }
+        // Extract Deps
+        let mut sync_deps = Vec::new();
+        let mut async_deps = Vec::new();
+        let mut imports_map = HashMap::new();
 
-        // Store JS Module
-        // We Wrap it: __nexus_register__("id", function(require, module, exports) { ... });
-        // NOTE: In prod, we optimize `__nexus_register__`.
-        // But for MVP, keeping same runtime format is safest.
-        let wrapped = format!("__nexus_register__(\"{}\", function(require, module, exports) {{\n{}\n}});\n", virtual_id, compiled.code);
-        
-        modules.push(BuildModule {
-            id: virtual_id.clone(),
-            code: wrapped,
-            is_vendor
-        });
+        if ext != "css" && !matches!(ext, "png" | "jpg" | "jpeg" | "gif" | "svg" | "wasm") {
+            let deps = extract_dependencies_detailed(&compiled.code, &virtual_id);
+            for (spec, is_dynamic) in deps {
+                if let Ok(resolved) = resolver.resolve(&current_path.parent().unwrap(), &spec) {
+                    let resolved_vid = normalize_id(&resolved);
+                    
+                    imports_map.insert(spec, resolved_vid.clone());
 
-        // Resolve Deps (if JS)
-        // Only if it has code (assets might have code too if URL export)
-        // But asset deps? No.
-        if ext != "css" && !matches!(ext, "png" | "jpg" | "jpeg" | "gif" | "svg" | "wasm") { 
-            // Only extract deps for JS modules
-            // For JSON, we compiled to JS (export object). No deps.
-            // For normal JS/TS:
-            let deps = extract_dependencies(&compiled.code, &virtual_id); // compiled.code is the inner body
-            for dep in deps {
-                if let Ok(resolved) = resolver.resolve(&current_path.parent().unwrap(), &dep) {
+                    if is_dynamic {
+                        async_deps.push(resolved_vid.clone());
+                    } else {
+                        sync_deps.push(resolved_vid.clone());
+                    }
+
                     let res_str = resolved.to_string_lossy().to_string();
-                    if !visited.contains(&res_str) {
-                        visited.insert(res_str);
+                    if !visited_paths.contains(&res_str) {
+                        visited_paths.insert(res_str);
                         queue.push_back(resolved);
                     }
                 }
             }
         }
+
+        nodes.insert(virtual_id.clone(), BuildNode {
+            id: virtual_id,
+            fs_path: current_path,
+            code: compiled.code,
+            is_vendor,
+            imports: imports_map,
+            sync_deps,
+            async_deps,
+            css: compiled.css,
+            asset: compiled.asset,
+        });
     }
 
-    // 4. Bundle Generation
-    let mut vendor_bundle = String::new();
-    let mut main_bundle = String::new();
-
-    // Inject Runtime into Vendor
-    vendor_bundle.push_str(NEXUS_RUNTIME_JS);
-    vendor_bundle.push('\n');
-
-    for m in modules {
-        if m.is_vendor {
-            vendor_bundle.push_str(&m.code);
-        } else {
-            main_bundle.push_str(&m.code);
+    // 4. Partitioning / Chunking
+    // Strategy:
+    // - Walk Sync graph from Entry -> Main Chunk
+    // - Identify Async Edges (from node inside Main Chunk or Async Chunk).
+    // - Each Async Target starts a new Chunk.
+    // - Shared Logic: If a node is reachable from entry and async, keep in entry?
+    //   If reachable from multiple async, put in shared?
+    //   Simple MVP:
+    //     - Assign every node to 'Entry' initially if reachable sync.
+    //     - Then find Async roots. Assign their subgraphs to Async chunks.
+    //     - BUT "No duplicate code". Only visit *unvisited* nodes?
+    //     - Yes. Code Splitting: if module already loaded by Entry, Async chunk shouldn't include it.
+    //     - So: 1. BFS Entry (Sync). Mark all as Main Bundle.
+    //           2. Identify Async Deps from Main Bundle nodes. Queue them as Async Roots.
+    //           3. Process Async Roots. BFS (Sync) from them.
+    //              If node already assigned (to Main or other Async), LINK it (dep) but DON'T include code.
+    //              If node unassigned, assign to current Async Chunk.
+    //     - This creates a waterfall.
+    
+    let mut module_chunk_map: HashMap<String, String> = HashMap::new(); // mod_id -> chunk_name
+    let mut chunks: Vec<Chunk> = Vec::new();
+    let mut chunk_queue = VecDeque::new();
+    
+    // Entry Chunk
+    chunk_queue.push_back((entry_virtual_id.clone(), "main.js".to_string(), true));
+    
+    // We iterate chunks.
+    // Be careful: async deps can appear ANYWHERE.
+    // We need to scan assigned modules for async edges to spawn new chunks.
+    // Better: Global Queue of (root_mod, chunk_name).
+    
+    while let Some((root_id, chunk_name, is_entry)) = chunk_queue.pop_front() {
+        // Create Chunk
+        let mut chunk_modules = Vec::new();
+        let mut bfs = VecDeque::new();
+        bfs.push_back(root_id);
+        
+        while let Some(curr) = bfs.pop_front() {
+            if module_chunk_map.contains_key(&curr) {
+                // Already in a chunk.
+                // If in THIS chunk, ignore.
+                // If in OTHER chunk, it's a shared dep (already loaded or parallel).
+                // Existing presence implies we don't need to bundle it again here.
+                continue;
+            }
+            
+            // Assign to this chunk
+            module_chunk_map.insert(curr.clone(), chunk_name.clone());
+            chunk_modules.push(curr.clone());
+            
+            if let Some(node) = nodes.get(&curr) {
+                // Follow SYNC deps
+                for dep in &node.sync_deps {
+                    bfs.push_back(dep.clone());
+                }
+                
+                // Identify ASYNC deps -> Spawn new chunks
+                for async_dep in &node.async_deps {
+                    if !module_chunk_map.contains_key(async_dep) {
+                        // Create name: chunk-[hash/id].js
+                        let name = format!("chunk-{}.js", async_dep.replace("/", "-").trim_start_matches('-'));
+                        chunk_queue.push_back((async_dep.clone(), name, false));
+                    }
+                }
+            }
+        }
+        
+        if !chunk_modules.is_empty() {
+             chunks.push(Chunk {
+                 name: chunk_name,
+                 modules: chunk_modules,
+                 is_entry
+             });
+        }
+    }
+    
+    // 5. Vendor Extraction
+    // Move "is_vendor" modules from their chunks to "vendor.js", UNLESS it breaks strict async isolation?
+    // Actually, "vendor.js" usually loaded upfront.
+    // If we move ALL vendors to `vendor.js` and load it in index.html, it's available globally.
+    // So we can safely move any module with `is_vendor=true` to `vendor.js`.
+    
+    let mut vendor_modules = Vec::new();
+    
+    // Filter out vendors from chunks
+    for chunk in &mut chunks {
+        let (vendors, app): (Vec<_>, Vec<_>) = chunk.modules.drain(..).partition(|id| {
+            nodes.get(id).map(|n| n.is_vendor).unwrap_or(false)
+        });
+        chunk.modules = app;
+        for v in vendors {
+            if !vendor_modules.contains(&v) {
+                vendor_modules.push(v);
+            }
+        }
+    }
+    // Note: This naive vendor extraction removes dupes if same vendor in multiple async chunks.
+    
+    // 6. Build Mapping for Runtime
+    // Map: Async Module ID -> Chunk Name
+    // We iterate all nodes. If node matches an Async Root target, we put key.
+    // Async Roots were those referenced in `async_deps`.
+    // Actually, simple map: Any module whose Chunk is NOT main?
+    // No, `__nexus_import__("/src/foo")` needs to know which file to fetch.
+    // If `/src/foo` is in `chunk-foo.js`. Map: `"/src/foo": "/assets/chunk-foo.js"`.
+    // If `/src/bar` is ALSO in `chunk-foo.js`. Map: `"/src/bar": "/assets/chunk-foo.js"`.
+    // So map ALL modules in async chunks?
+    // YES.
+    
+    let mut nexus_chunk_map = HashMap::new();
+    for chunk in &chunks {
+        if !chunk.is_entry {
+            for mod_id in &chunk.modules {
+                nexus_chunk_map.insert(mod_id.clone(), format!("/assets/{}", chunk.name));
+            }
+        }
+    }
+    // Also include vendors? Vendors are loaded via script tag generally (vendor.js).
+    // If an async chunk depends on a vendor not yet loaded... but vendors are global.
+    // We assume vendor.js loaded.
+    
+    // 7. Emit Bundles
+    let mut css_bundle = String::new();
+    
+    // Assets & CSS aggregation
+    for node in nodes.values() {
+        if let Some(css) = &node.css {
+            css_bundle.push_str(css);
+            css_bundle.push('\n');
+        }
+        if let Some((name, data)) = &node.asset {
+            tokio::fs::write(dist.join(name), data).await?;
         }
     }
 
-    // Append Entry execution to main
-    // We assume the first module added was entry? No, queue order might differ?
-    // But we know entry_abs.
-    let entry_lossy = entry_abs.to_string_lossy().replace(root.to_string_lossy().as_ref(), "").replace("\\", "/");
-    let entry_id = if entry_lossy.starts_with('/') { entry_lossy } else { format!("/{}", entry_lossy) };
+    // Vendor Bundle
+    let mut vendor_code = String::new();
+    vendor_code.push_str(NEXUS_RUNTIME_JS);
+    vendor_code.push('\n');
+    for vid in &vendor_modules {
+        if let Some(node) = nodes.get(vid) {
+            let transformed = transform_cjs(&node.code, &node.id, &node.imports);
+            vendor_code.push_str(&format!(
+                "__nexus_register__(\"{}\", function(require, module, exports) {{\n{}\n}});\n",
+                node.id, transformed
+            ));
+        }
+    }
+
+    // Chunks
+    for chunk in chunks {
+        let mut code = String::new();
+        for mid in &chunk.modules {
+            if let Some(node) = nodes.get(mid) {
+                let transformed = transform_cjs(&node.code, &node.id, &node.imports);
+                code.push_str(&format!(
+                    "__nexus_register__(\"{}\", function(require, module, exports) {{\n{}\n}});\n",
+                    node.id, transformed
+                ));
+            }
+        }
+        
+        if chunk.is_entry {
+            // Inject Chunk Map
+            if !nexus_chunk_map.is_empty() {
+                let map_json = serde_json::to_string(&nexus_chunk_map).unwrap();
+                code.push_str(&format!("\nwindow.__nexus_chunk_map__ = {};\n", map_json));
+            }
+            // Bootstrap
+            code.push_str(&format!("\n__nexus_require__(\"{}\");\n", entry_virtual_id));
+        }
+        
+        tokio::fs::write(assets_dir.join(&chunk.name), code).await?;
+    }
     
-    main_bundle.push_str(&format!("\n__nexus_require__(\"{}\");\n", entry_id));
-
-    // Write Bundles
-    tokio::fs::write(assets_dir.join("vendor.js"), vendor_bundle).await?;
-    tokio::fs::write(assets_dir.join("main.js"), main_bundle).await?;
+    tokio::fs::write(assets_dir.join("vendor.js"), vendor_code).await?;
     tokio::fs::write(assets_dir.join("style.css"), css_bundle).await?;
-
-    // 5. HTML Generation
-    let html_path = root.join("index.html");
-    if html_path.exists() {
-        let mut html = tokio::fs::read_to_string(&html_path).await?;
-        // Inject tags before </head> or </body>
-        // Simple replace for MVP
-        let tags = r#"
+    
+    // 8. HTML
+     let html_path = root.join("index.html");
+     let tags = r#"
     <link rel="stylesheet" href="/assets/style.css">
     <script src="/assets/vendor.js"></script>
     <script src="/assets/main.js"></script>
 "#;
+    if html_path.exists() {
+        let mut html = tokio::fs::read_to_string(&html_path).await?;
         if html.contains("</body>") {
             html = html.replace("</body>", &format!("{}</body>", tags));
         } else {
             html.push_str(tags);
         }
-        
-        tokio::fs::write(dist.join("index.html"), html).await?;
+         tokio::fs::write(dist.join("index.html"), html).await?;
     } else {
-        tracing::warn!("index.html not found, generating minimal");
-        let html = format!(r#"<!DOCTYPE html><html><body>{}</body></html>"#, r#"
-    <link rel="stylesheet" href="/assets/style.css">
-    <script src="/assets/vendor.js"></script>
-    <script src="/assets/main.js"></script>
-"#);
+        let html = format!(r#"<!DOCTYPE html><html><body>{}</body></html>"#, tags);
         tokio::fs::write(dist.join("index.html"), html).await?;
     }
 
-    tracing::info!("Build Complete! Output in dist/");
+    tracing::info!("Build Complete.");
     Ok(())
 }

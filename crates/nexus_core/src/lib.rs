@@ -15,7 +15,7 @@ use tower_http::{services::ServeDir, trace::TraceLayer};
 pub mod graph;
 use graph::*;
 pub mod parser;
-use parser::extract_dependencies;
+use parser::extract_dependencies_detailed;
 pub mod compiler;
 use compiler::{compile, compile_css};
 pub mod bundler;
@@ -159,7 +159,7 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
     }
 
     // Week 4: Extract Dependencies (from compiled/raw JS)
-    let deps = extract_dependencies(&compiled_code, path_str);
+    let deps = extract_dependencies_detailed(&compiled_code, path_str);
 
     let final_content;
     let module_id;
@@ -216,7 +216,7 @@ if (module.hot) {
         // Resolve Dependencies
         let mut resolved_imports = std::collections::HashMap::new();
         
-        for dep_spec in deps {
+        for (dep_spec, is_dynamic) in deps {
             // Week 9: Use Resolver
             match state.resolver.resolve(&abs_path, &dep_spec) {
                 Ok(resolved_abs_path) => {
@@ -245,7 +245,7 @@ if (module.hot) {
                          graph.add_module(&graph_key, "")
                      };
                      
-                     let _ = graph.add_dependency(current_id, dep_id);
+                     let _ = graph.add_dependency(current_id, dep_id, is_dynamic);
                 }
                 Err(e) => {
                     tracing::error!("Failed to resolve import '{}' from '{}': {}", dep_spec, path_str, e);
@@ -495,134 +495,4 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
     tracing::info!("starting server on {}", addr);
     let listener = tokio::net::TcpListener::bind(addr).await?;
     axum::serve(listener, app).await
-}
-
-
-
-    let addr = SocketAddr::from(([0, 0, 0, 0], port));
-    
-    tracing::info!("starting server on {}", addr);
-    tracing::info!("serving root: {}", root);
-
-    let listener = tokio::net::TcpListener::bind(addr).await?;
-    tracing::info!("listening on {}", addr);
-
-    axum::serve(listener, app.with_state(state))
-        .with_graceful_shutdown(shutdown_signal())
-        .await
-}
-
-
-// Week 7: Runtime
-pub mod runtime;
-use runtime::NEXUS_RUNTIME_JS;
-use parser::transform_cjs;
-
-async fn handle_chunk(state: AppState, uri: Uri) -> Response {
-    let path = uri.path().strip_prefix("/_nexus/chunk").unwrap_or("/");
-    let graph = state.graph.read().unwrap();
-    
-    let root_id = match graph.find_by_path(path) {
-        Some(id) => id,
-        None => return (StatusCode::NOT_FOUND, "Chunk entry not found").into_response(),
-    };
-    
-    let sorted_ids = graph.linearize(root_id);
-    
-    let mut chunk_content = String::new();
-    
-    // 1. Inject Runtime
-    chunk_content.push_str(NEXUS_RUNTIME_JS);
-    chunk_content.push('\n');
-
-    // 2. Inject HMR Client (Week 6) - We keep this for reloading
-    // Note: In a real linker, HMR client would also be a module.
-    // For now, we append it as a global script side-effect.
-    chunk_content.push_str(&format!(r#"
-(function() {{
-    const chunkPath = "{}";
-    const ws = new WebSocket("ws://" + location.host + "/ws");
-    ws.onmessage = (e) => {{
-        const msg = JSON.parse(e.data);
-        if (msg.type === "reload" && msg.chunk === chunkPath) {{
-            console.log("[Nexus] Reloading", chunkPath);
-            location.reload();
-        }}
-    }};
-}})();
-"#, path));
-
-    // 3. Emit Wrapped Modules
-    for id in sorted_ids {
-        if let Some(module) = graph.modules.get(id.0) {
-            // A. Transform Imports (ESM -> CJS)
-            let transformed_source = transform_cjs(&module.source, &module.path);
-            
-            // B. Wrap in Registry
-            // __nexus_register__("path", function(require, module, exports) { ... })
-            chunk_content.push_str(&format!(
-                "__nexus_register__(\"{}\", function(require, module, exports) {{\n// Source: {}\n{}\n}});\n",
-                module.path,
-                module.path,
-                transformed_source
-            ));
-        }
-    }
-    
-    // 4. Bootstrap Entry
-    if let Some(entry_module) = graph.modules.get(root_id.0) {
-         chunk_content.push_str(&format!("__nexus_require__(\"{}\");", entry_module.path));
-    }
-    
-    let mut headers = HeaderMap::new();
-    headers.insert("Content-Type", "application/javascript".parse().unwrap());
-    
-    (StatusCode::OK, headers, chunk_content).into_response()
-}
-
-
-async fn handle_ws(
-    ws: axum::extract::ws::WebSocketUpgrade,
-    State(state): State<AppState>,
-) -> Response {
-    ws.on_upgrade(|socket| handle_socket(socket, state))
-}
-
-async fn handle_socket(mut socket: axum::extract::ws::WebSocket, state: AppState) {
-    let mut rx = state.hmr_tx.subscribe();
-    
-    while let Ok(msg) = rx.recv().await {
-        for path in msg.paths {
-            let payload = format!(r#"{{"type":"reload","chunk":"{}"}}"#, path);
-            if socket.send(axum::extract::ws::Message::Text(payload)).await.is_err() {
-                return;
-            }
-        }
-    }
-}
-
-async fn shutdown_signal() {
-    let ctrl_c = async {
-        tokio::signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
-    tokio::select! {
-        _ = ctrl_c => {},
-        _ = terminate => {},
-    }
-    
-    tracing::info!("signal received, starting graceful shutdown");
 }

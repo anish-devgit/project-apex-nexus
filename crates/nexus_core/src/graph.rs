@@ -16,6 +16,7 @@ pub struct Module {
 pub struct ModuleGraph {
     pub modules: Vec<Module>,
     pub outgoing_edges: Vec<Vec<ModuleId>>,
+    pub dynamic_edges: Vec<Vec<ModuleId>>,
     pub incoming_edges: Vec<Vec<ModuleId>>,
 }
 
@@ -24,6 +25,7 @@ impl ModuleGraph {
         Self {
             modules: Vec::new(),
             outgoing_edges: Vec::new(),
+            dynamic_edges: Vec::new(),
             incoming_edges: Vec::new(),
         }
     }
@@ -41,11 +43,12 @@ impl ModuleGraph {
         };
         self.modules.push(module);
         self.outgoing_edges.push(Vec::new());
+        self.dynamic_edges.push(Vec::new());
         self.incoming_edges.push(Vec::new());
         id
     }
 
-    pub fn add_dependency(&mut self, from: ModuleId, to: ModuleId) -> Result<(), String> {
+    pub fn add_dependency(&mut self, from: ModuleId, to: ModuleId, is_dynamic: bool) -> Result<(), String> {
         if from.0 >= self.modules.len() || to.0 >= self.modules.len() {
             return Err("ModuleId out of bounds".to_string());
         }
@@ -53,10 +56,14 @@ impl ModuleGraph {
             return Err("Self-dependency not allowed".to_string());
         }
 
-        // Fix 1: Mandatory Idempotency Check
-        // Ensure strictly one edge per relation in both directions
-        if !self.outgoing_edges[from.0].contains(&to) {
-            self.outgoing_edges[from.0].push(to);
+        if is_dynamic {
+            if !self.dynamic_edges[from.0].contains(&to) {
+                self.dynamic_edges[from.0].push(to);
+            }
+        } else {
+            if !self.outgoing_edges[from.0].contains(&to) {
+                self.outgoing_edges[from.0].push(to);
+            }
         }
 
         if !self.incoming_edges[to.0].contains(&from) {

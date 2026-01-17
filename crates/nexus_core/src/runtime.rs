@@ -59,6 +59,36 @@ pub const NEXUS_RUNTIME_JS: &str = r#"
 
     return module.exports;
   };
+
+  // 5. Async Import
+  global.__nexus_chunk_map__ = global.__nexus_chunk_map__ || {};
+  
+  global.__nexus_import__ = function(id) {
+    if (global.__nexus_modules__[id]) {
+      return Promise.resolve(global.__nexus_require__(id));
+    }
+
+    let url = id;
+    if (global.__nexus_chunk_map__[id]) {
+        url = global.__nexus_chunk_map__[id];
+    }
+    
+    // Normalize URL? If ID is /src/foo and map has it, use map.
+    // If not in map, assume Dev Mode and fetch ID directly.
+
+    return fetch(url)
+      .then(res => {
+          if (!res.ok) throw new Error("[Nexus] Failed to load chunk: " + url);
+          return res.text();
+      })
+      .then(code => {
+          (0, eval)(code);
+          if (!global.__nexus_modules__[id]) {
+              throw new Error("[Nexus] Async chunk loaded but module not registered: " + id);
+          }
+          return global.__nexus_require__(id);
+      });
+  };
 })(typeof window !== 'undefined' ? window : this);
 "#;
 
