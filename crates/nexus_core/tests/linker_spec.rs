@@ -36,7 +36,33 @@ fn test_cjs_transform_named_export() {
     let source = "export { foo };";
     let imports = HashMap::new();
     let result = transform_cjs(source, "test.js", &imports);
-    assert!(result.contains("exports.foo = foo;"));
+    // Should use Object.defineProperty
+    assert!(result.contains("Object.defineProperty(exports, \"foo\", { enumerable: true, get: function() { return foo; } });"));
+}
+
+#[test]
+fn test_cjs_transform_const_export() {
+    let source = "export const x = 1;";
+    let imports = HashMap::new();
+    let result = transform_cjs(source, "test.js", &imports);
+    
+    // Should strip "export " -> "const x = 1;"
+    // And append defineProperty
+    assert!(result.contains("const x = 1;"));
+    assert!(!result.contains("export const x")); 
+    assert!(result.contains("Object.defineProperty(exports, \"x\", { enumerable: true, get: function() { return x; } });"));
+}
+
+#[test]
+fn test_cjs_transform_let_live_binding() {
+    // Verify that mutable exports use getter
+    let source = "export let count = 0; export function inc() { count++; }";
+    let imports = HashMap::new();
+    let result = transform_cjs(source, "test.js", &imports);
+    
+    assert!(result.contains("let count = 0;"));
+    assert!(result.contains("Object.defineProperty(exports, \"count\", { enumerable: true, get: function() { return count; } });"));
+    assert!(result.contains("Object.defineProperty(exports, \"inc\", { enumerable: true, get: function() { return inc; } });"));
 }
 
 #[test]

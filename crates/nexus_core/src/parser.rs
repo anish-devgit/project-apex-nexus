@@ -144,60 +144,61 @@ pub fn transform_cjs(source: &str, path: &str, imports: &std::collections::HashM
                     }
                 }
                 ModuleDeclaration::ExportNamedDeclaration(export_named) => {
-                    // export const x = 1; -> exports.x = 1;
-                    // export { x }; -> exports.x = x;
+                    // export const x = 1; -> const x = 1; Object.defineProperty...
+                    // export { x }; -> Object.defineProperty...
                     
                     let start = export_named.span.start;
                     
                     if let Some(decl) = &export_named.declaration {
-                        // export const ...
+                        let mut names = Vec::new();
+                        let mut decl_start = start; // Default to start, update based on decl type
+                        
                         match decl {
                             oxc_ast::ast::Declaration::VariableDeclaration(var_decl) => {
-                                // export const x = 1;
-                                // We replace "export const" with "exports." ?? No.
-                                // "const x = 1; exports.x = x;" ?
-                                // Or "exports.x = 1" (if we remove const).
-                                // Spec says: "export const x = 1; -> exports.x = 1;"
-                                // This implies removing `const` and `x`.
-                                // Wait, `const x = 1` defines `x` in local scope too?
-                                // "Scope Isolation: Variables declared ... are private".
-                                // If I do `exports.x = 1`, then `x` is not defined locally?
-                                // Usually we want: `const x = 1; exports.x = x;`
-                                // But spec example: `export const x = 1; exports.x = 1;`
-                                // I'll stick to replacing "export " with nothing, and appending assignment?
-                                // Or simply:
-                                // `export const x = 1` -> `exports.x = 1` (but then x is not const local).
-                                // Let's try to preserve `const x = 1` and add `exports.x = x` after?
-                                // Complexity 4 allows some heuristic.
-                                
-                                // Let's do a simple replace "export " -> "" and append `exports.{name} = {name}` at end?
-                                // No, strict replacement is better.
-                                // Simple approach:
-                                // "export const x = 1" -> "exports.x = 1" (if simple init)
-                                // Let's just remove "export " keyword.
-                                // And rewrite `const x =` to `exports.x =`?
-                                // VariableDeclaration has `declarations`.
-                                
-                                // MVP Simplification:
-                                // Only handle `export default` and `import` robustly.
-                                // For `export const`, we might struggle with multiple declarators.
-                                // Spec: "export const x = 1; -> exports.x = 1;"
-                                // I will do: Replace "export " with "". Then rely on "exports.x = x" manually? 
-                                // No, standard CJS transform is `exports.x = ...`
-                                
-                                // Let's look at `specifiers`. `export { x }`.
+                                decl_start = var_decl.span.start;
+                                for d in &var_decl.declarations {
+                                     // Simple Identifier support
+                                     if let oxc_ast::ast::BindingPatternKind::BindingIdentifier(id) = &d.id.kind {
+                                         names.push(id.name.as_str().to_string());
+                                     }
+                                }
+                            }
+                            oxc_ast::ast::Declaration::FunctionDeclaration(f) => {
+                                decl_start = f.span.start;
+                                if let Some(id) = &f.id {
+                                    names.push(id.name.as_str().to_string());
+                                }
+                            }
+                            oxc_ast::ast::Declaration::ClassDeclaration(c) => {
+                                decl_start = c.span.start;
+                                if let Some(id) = &c.id {
+                                    names.push(id.name.as_str().to_string());
+                                }
                             }
                             _ => {}
                         }
+                        
+                        if !names.is_empty() {
+                            // Remove "export " keyword
+                            replacements.push((start, decl_start, "".to_string()));
+                            
+                            // Append DefineProperty calls
+                            let defines: Vec<String> = names.into_iter().map(|name| {
+                                format!("Object.defineProperty(exports, \"{}\", {{ enumerable: true, get: function() {{ return {}; }} }});", name, name)
+                            }).collect();
+                            
+                            replacements.push((export_named.span.end, export_named.span.end, format!("\n{}", defines.join("\n"))));
+                        }
+                        
                     } else if !export_named.specifiers.is_empty() {
                          // export { x }
-                         let mut assigns = Vec::new();
+                         let mut defines = Vec::new();
                          for spec in &export_named.specifiers {
                              let exported = spec.exported.name().as_str();
                              let local = spec.local.name().as_str();
-                             assigns.push(format!("exports.{} = {};", exported, local));
+                             defines.push(format!("Object.defineProperty(exports, \"{}\", {{ enumerable: true, get: function() {{ return {}; }} }});", exported, local));
                          }
-                         replacements.push((start, export_named.span.end, assigns.join("\n")));
+                         replacements.push((start, export_named.span.end, defines.join("\n")));
                     }
                 }
                 _ => {}
