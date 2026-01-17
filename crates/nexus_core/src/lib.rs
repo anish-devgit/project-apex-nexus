@@ -16,6 +16,7 @@ pub mod graph;
 use graph::*;
 pub mod parser;
 use parser::extract_dependencies;
+pub mod watcher;
 
 // --- DATA STRUCTURES ---
 
@@ -23,6 +24,7 @@ use parser::extract_dependencies;
 struct AppState {
     graph: Arc<RwLock<ModuleGraph>>,
     root_dir: String,
+    hmr_tx: tokio::sync::broadcast::Sender<watcher::HmrMessage>,
 }
 
 // --- MODULE HANDLER ---
@@ -144,9 +146,25 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
 // --- SERVER ---
 
 pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error> {
+    // Week 6: Start Watcher Channel
+    let (tx, _) = tokio::sync::broadcast::channel(100);
+    
+    // Spawn Watcher
+    let watcher_tx = tx.clone();
+    let graph = Arc::new(RwLock::new(ModuleGraph::new()));
+    
+    let watcher_graph = graph.clone();
+    let watcher_root = root.clone();
+    let server_root = root.clone();
+    
+    tokio::spawn(async move {
+        watcher::start_watcher(watcher_root, watcher_graph, watcher_tx).await;
+    });
+
     let state = AppState {
-        graph: Arc::new(RwLock::new(ModuleGraph::new())),
-        root_dir: root.clone(),
+        graph,
+        root_dir: server_root.clone(),
+        hmr_tx: tx,
     };
 
     let serve_dir = ServeDir::new(&root);
@@ -176,6 +194,7 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
     });
 
     let app = Router::new()
+        .route("/ws", get(handle_ws))
         .fallback_service(service)
         .layer(TraceLayer::new_for_http());
 
@@ -187,15 +206,13 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
     let listener = tokio::net::TcpListener::bind(addr).await?;
     tracing::info!("listening on {}", addr);
 
-    axum::serve(listener, app)
+    axum::serve(listener, app.with_state(state))
         .with_graceful_shutdown(shutdown_signal())
         .await
 }
 
 async fn handle_chunk(state: AppState, uri: Uri) -> Response {
     let path = uri.path().strip_prefix("/_nexus/chunk").unwrap_or("/");
-    // path is now the module path, e.g. /src/main.ts
-    
     let graph = state.graph.read().unwrap();
     
     let root_id = match graph.find_by_path(path) {
@@ -206,6 +223,22 @@ async fn handle_chunk(state: AppState, uri: Uri) -> Response {
     let sorted_ids = graph.linearize(root_id);
     
     let mut chunk_content = String::new();
+    
+    // Inject HMR Client
+    chunk_content.push_str(&format!(r#"
+(function() {{
+    const chunkPath = "{}";
+    const ws = new WebSocket("ws://" + location.host + "/ws");
+    ws.onmessage = (e) => {{
+        const msg = JSON.parse(e.data);
+        if (msg.type === "reload" && msg.chunk === chunkPath) {{
+            console.log("[Nexus] Reloading", chunkPath);
+            location.reload();
+        }}
+    }};
+}})();
+"#, path));
+
     for id in sorted_ids {
         if let Some(module) = graph.modules.get(id.0) {
             chunk_content.push_str(&format!("/* Module: {} */\n", module.path));
@@ -218,6 +251,26 @@ async fn handle_chunk(state: AppState, uri: Uri) -> Response {
     headers.insert("Content-Type", "application/javascript".parse().unwrap());
     
     (StatusCode::OK, headers, chunk_content).into_response()
+}
+
+async fn handle_ws(
+    ws: axum::extract::ws::WebSocketUpgrade,
+    State(state): State<AppState>,
+) -> Response {
+    ws.on_upgrade(|socket| handle_socket(socket, state))
+}
+
+async fn handle_socket(mut socket: axum::extract::ws::WebSocket, state: AppState) {
+    let mut rx = state.hmr_tx.subscribe();
+    
+    while let Ok(msg) = rx.recv().await {
+        for path in msg.paths {
+            let payload = format!(r#"{{"type":"reload","chunk":"{}"}}"#, path);
+            if socket.send(axum::extract::ws::Message::Text(payload)).await.is_err() {
+                return;
+            }
+        }
+    }
 }
 
 async fn shutdown_signal() {
