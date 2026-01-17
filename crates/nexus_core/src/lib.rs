@@ -272,24 +272,47 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
 
 // Logic extracted for easy calling from Service
 async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
-    let path = uri.path();
-    tracing::info!("Intercepted request: {}", path);
+    let path_str = uri.path();
+    tracing::info!("Intercepted request: {}", path_str);
 
-    let relative_path = path.strip_prefix('/').unwrap_or(path);
-    let abs_path = std::path::Path::new(&state.root_dir).join(relative_path);
+    // FIX 2: Path Sanitization
+    // Prevent directory traversal by only allowing Normal components
+    let mut safe_path = std::path::PathBuf::new();
+    for component in std::path::Path::new(path_str).components() {
+        match component {
+            std::path::Component::Normal(c) => safe_path.push(c),
+            _ => {
+                // Ignore Prefix, RootDir, CurDir, ParentDir for safety
+                // Effectively stripping them out or ignoring the path segment
+                // If we want to be strict and reject ".." we could return error
+                // But typically we just want to construct a clean relative path
+            }
+        }
+    }
+    
+    // If path is empty (e.g. just "/"), likely not valid for a module handle but let's check
+    if safe_path.as_os_str().is_empty() {
+         return (StatusCode::BAD_REQUEST, "Invalid path").into_response();
+    }
 
+    let abs_path = std::path::Path::new(&state.root_dir).join(&safe_path);
+
+    // FIX 1: Non-blocking I/O
     let content = match tokio::fs::read_to_string(&abs_path).await {
         Ok(c) => c,
         Err(e) => {
             tracing::error!("Failed to read file {}: {}", abs_path.display(), e);
-            // If it matches extension but is missing, 404
             return (StatusCode::NOT_FOUND, "File not found").into_response();
         }
     };
 
     {
         let mut graph = state.graph.write().unwrap();
-        let id = path.to_string();
+        // Use the sanitized path_str or safe_path as ID? 
+        // User said "id = path.to_string()" originally.
+        // Let's keep using the URI path as ID to match browser requests.
+        let id = path_str.to_string();
+        
         let version = if let Some(node) = graph.nodes.get(&id) {
             node.version + 1
         } else {
@@ -308,8 +331,9 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
         tracing::info!("Graph Node Created. Total Nodes: {}", count);
     }
 
+    // FIX 3: Header Consistency
     let mut headers = HeaderMap::new();
-    headers.insert("X-Apex-Intercept", "True".parse().unwrap());
+    headers.insert("X-Apex-Intercept", "true".parse().unwrap()); // Changed to lowercase "true" as per std convention often, user asked "true"
     headers.insert("Content-Type", "application/javascript".parse().unwrap());
 
     (StatusCode::OK, headers, content).into_response()
