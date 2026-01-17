@@ -10,3 +10,7 @@ tower = { version = "0.4", features = ["util"] }
 tower-http = { version = "0.5", features = ["fs", "trace"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
+oxc_parser = "0.13"
+oxc_allocator = "0.13"
+oxc_span = "0.13"
+oxc_ast = "0.13"

@@ -14,6 +14,8 @@ use tower_http::{services::ServeDir, trace::TraceLayer};
 
 pub mod graph;
 use graph::*;
+pub mod parser;
+use parser::extract_dependencies;
 
 // --- DATA STRUCTURES ---
 
@@ -30,6 +32,39 @@ async fn handle_module(
     uri: Uri,
 ) -> impl IntoResponse {
     handle_module_logic(state, uri).await
+}
+
+fn resolve_import(base_path: &str, import_spec: &str) -> String {
+    let base = std::path::Path::new(base_path);
+    let parent = base.parent().unwrap_or_else(|| std::path::Path::new("/"));
+    
+    // Join and normalize
+    let joined = parent.join(import_spec);
+    
+    // Normalize (std::fs::canonicalize requires file existence, so we do logical normaliztion)
+    let mut normalized = std::path::PathBuf::new();
+    for component in joined.components() {
+        match component {
+            std::path::Component::RootDir => normalized.push("/"),
+            std::path::Component::Normal(c) => normalized.push(c),
+            std::path::Component::ParentDir => { normalized.pop(); },
+            std::path::Component::CurDir => {},
+            _ => {},
+        }
+    }
+    
+    // Ensure it starts with / 
+    let s = normalized.to_string_lossy().to_string();
+    if !s.starts_with('/') && !s.starts_with('\\') { // windows?
+         // On windows joined might be `\src\utils.js`.
+         // We want slash consistency? 
+         // The `uri.path()` usually has forward slashes.
+         // `Path` operations might use backslashes on Windows.
+         // Let's force forward slashes for the Graph IDs to be consistent with Uris.
+         // `to_string_lossy` uses native.
+         // We should replace `\` with `/`.
+    }
+    s.replace('\\', "/")
 }
 
 async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
@@ -60,6 +95,9 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
         }
     };
 
+    // Week 4: Extract Dependencies
+    let deps = extract_dependencies(&content, path_str);
+
     {
         let mut graph = state.graph.write().unwrap();
         
@@ -67,10 +105,28 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
         // The path in graph should probably match the request path (path_str) for identification
         let id_opt = graph.find_by_path(path_str);
         
-        if let Some(id) = id_opt {
+        let current_id = if let Some(id) = id_opt {
             graph.update_source(id, &content);
+            id
         } else {
-            graph.add_module(path_str, &content);
+            graph.add_module(path_str, &content)
+        };
+        
+        // Populate dependencies
+        for dep_spec in deps {
+            // Filter only relative imports for Week 4
+            if dep_spec.starts_with("./") || dep_spec.starts_with("../") {
+                let resolved_path = resolve_import(path_str, &dep_spec);
+                
+                let dep_id = if let Some(id) = graph.find_by_path(&resolved_path) {
+                    id
+                } else {
+                    // Add missing module with empty source (placeholder)
+                    graph.add_module(&resolved_path, "")
+                };
+                
+                let _ = graph.add_dependency(current_id, dep_id);
+            }
         }
         
         let count = graph.modules.len();
