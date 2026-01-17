@@ -1,0 +1,14 @@
+{
+    "name": "nexus",
+    "version": "0.1.0",
+    "main": "index.js",
+    "bin": {
+        "nexus": "./bin/nexus.js"
+    },
+    "scripts": {
+        "build": "napi build --platform --release ../../crates/nexus_binding"
+    },
+    "dependencies": {
+        "@napi-rs/cli": "^3.0.0"
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "name": "project-apex-nexus",
+    "private": true,
+    "scripts": {
+        "dev": "pnpm --filter nexus dev"
+    },
+    "devDependencies": {
+        "@napi-rs/cli": "^3.0.0"
+    }
+}
