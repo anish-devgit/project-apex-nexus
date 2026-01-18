@@ -1,7 +1,6 @@
 use oxc_allocator::Allocator;
 use oxc_parser::Parser;
 use oxc_span::SourceType;
-use oxc_transformer::{TransformOptions, Transformer};
 use oxc_codegen::{Codegen, CodegenOptions};
 use std::path::Path;
 
@@ -143,8 +142,8 @@ pub fn compile(source: &str, filename: &str, _is_prod: bool) -> CompileResult {
     // For now, we skip transformation which means TSX/JSX won't be transformed
     // but at least the build will succeed
     
-    // 3. Codegen - Fixed to use correct oxc_codegen v0.13.0 API
-    let codegen = Codegen::<false>::new(source, filename, CodegenOptions::default(), None);
+    // 3. Codegen
+    let codegen = Codegen::new();
     let ret = codegen.build(&program);
 
     CompileResult {
