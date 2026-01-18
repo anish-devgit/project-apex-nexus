@@ -2,6 +2,7 @@ use axum::{
     extract::{Path, State},
     http::{HeaderMap, StatusCode, Uri},
     response::{IntoResponse, Response},
+    body::Body,
     routing::get,
     Router,
 };
@@ -163,7 +164,7 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
     // Week 4: Extract Dependencies (from compiled/raw JS)
     let deps = extract_dependencies_detailed(&compiled_code, path_str);
 
-    let final_content;
+    let mut final_content;
     let module_id;
 
     {
@@ -483,12 +484,12 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
                 let response = handle_module_logic(state, uri).await;
                 Ok::<_, std::io::Error>(response)
             } else if path.starts_with("/_nexus/chunk") {
-                 let response = handle_chunk(state, uri).await;
+                 let response = handle_chunk(State(state), uri).await;
                  Ok::<_, std::io::Error>(response)
             } else {
-                let res: Result<axum::response::Response, _> = serve_dir.oneshot(req).await;
+                let res = serve_dir.oneshot(req).await;
                 match res {
-                    Ok(r) => Ok(r.into_response()),
+                    Ok(r) => Ok(r.map(Body::new)),
                     Err(_) => Ok(StatusCode::INTERNAL_SERVER_ERROR.into_response()) 
                 }
             }
