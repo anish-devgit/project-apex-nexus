@@ -482,10 +482,10 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
             
             if path.ends_with(".ts") || path.ends_with(".tsx") || path.ends_with(".js") || path.ends_with(".jsx") {
                 let response = handle_module_logic(state, uri).await;
-                Ok::<_, std::io::Error>(response)
+                Ok::<_, std::io::Error>(response.into_response())
             } else if path.starts_with("/_nexus/chunk") {
                  let response = handle_chunk(State(state), uri).await;
-                 Ok::<_, std::io::Error>(response)
+                 Ok::<_, std::io::Error>(response.into_response())
             } else {
                 let res = serve_dir.oneshot(req).await;
                 match res {
@@ -500,7 +500,8 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
         .route("/ws", get(handle_ws))
         .route("/_nexus/sourcemap/:id", get(handle_sourcemap))
         .fallback_service(service)
-        .layer(TraceLayer::new_for_http());
+        .layer(TraceLayer::new_for_http())
+        .with_state(state);
 
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
