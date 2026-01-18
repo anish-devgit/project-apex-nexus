@@ -24,6 +24,7 @@ oxc_parser = "0.54"
 oxc_span = "0.54"
 oxc_ast = "0.54"
 oxc_codegen = "0.54"
+oxc_ast_visit = "0.54"
 
 [dev-dependencies]
 tempfile = "3.8"

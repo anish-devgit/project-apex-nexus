@@ -4,7 +4,7 @@ use oxc_span::SourceType;
 use oxc_ast::ast::{ModuleDeclaration, ImportDeclarationSpecifier}; // Adjust based on exact structure if needed
 
 
-use oxc_ast::visit::Visit;
+use oxc_ast_visit::Visit;
 use oxc_ast::ast::*;
 
 struct DependencyVisitor {

@@ -414,6 +414,16 @@ async fn handle_chunk(
     (StatusCode::OK, headers, chunk).into_response()
 }
 
+// --- WEBSOCKET HANDLER ---
+
+async fn handle_ws(
+    State(_state): State<AppState>,
+) -> impl IntoResponse {
+    // TODO: Implement WebSocket upgrade for HMR
+    // For now, return 501 Not Implemented to unblock binary compilation
+    (StatusCode::NOT_IMPLEMENTED, "WebSocket HMR not yet implemented")
+}
+
 // --- SERVER ---
 
 pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error> {

@@ -32,7 +32,7 @@ pub fn compile_asset(bytes: &[u8], filename: &str, is_prod: bool) -> CompileResu
     if bytes.len() < 8 * 1024 {
         let mime = mime_guess::from_path(filename).first_or_octet_stream();
         let b64 = base64::engine::general_purpose::STANDARD.encode(bytes);
-        let code = format!("export default \"data:{};base64,{}"\";", mime, b64);
+        let code = format!("export default \"data:{};base64,{}\"", mime, b64);
         return CompileResult { code, sourcemap: None, css: None, asset: None };
     }
     
@@ -42,7 +42,7 @@ pub fn compile_asset(bytes: &[u8], filename: &str, is_prod: bool) -> CompileResu
         let name = std::path::Path::new(filename).file_name().unwrap_or_default().to_string_lossy();
         let out_path = format!("assets/{}", name);
         // URL for runtime (absolute)
-        let code = format!("export default \"/{}"\";", out_path);
+        let code = format!("export default \"/{}\"", out_path);
         
         return CompileResult {
             code,
