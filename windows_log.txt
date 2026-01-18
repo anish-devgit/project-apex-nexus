@@ -1,0 +1,649 @@
+Build x86_64-pc-windows-msvc	Set up job	﻿2026-01-18T16:11:44.1837540Z Current runner version: '2.331.0'
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1888419Z ##[group]Runner Image Provisioner
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1889192Z Hosted Compute Agent
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1889687Z Version: 20251211.462
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1890256Z Commit: 6cbad8c2bb55d58165063d031ccabf57e2d2db61
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1890927Z Build Date: 2025-12-11T16:28:49Z
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1891492Z Worker ID: {8e1bd46f-6929-4a4f-98e4-25c0bad4f7cb}
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1892110Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1892561Z ##[group]Operating System
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1893116Z Microsoft Windows Server 2025
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1893637Z 10.0.26100
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1894053Z Datacenter
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1894471Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1894863Z ##[group]Runner Image
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1895367Z Image: windows-2025
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1895785Z Version: 20260111.179.1
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1896710Z Included Software: https://github.com/actions/runner-images/blob/win25/20260111.179/images/windows/Windows2025-Readme.md
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1900016Z Image Release: https://github.com/actions/runner-images/releases/tag/win25%2F20260111.179
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1902221Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1904295Z ##[group]GITHUB_TOKEN Permissions
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1907953Z Contents: read
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1908835Z Metadata: read
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1909585Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1912276Z Secret source: Actions
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.1913524Z Prepare workflow directory
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.2296283Z Prepare all required actions
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.2338067Z Getting action download info
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.4916945Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.6095591Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.7693259Z Download action repository 'dtolnay/rust-toolchain@stable' (SHA:4be9e76fd7c4901c61fb841f559994984270fce7)
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:44.9387047Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Build x86_64-pc-windows-msvc	Set up job	2026-01-18T16:11:45.3448953Z Complete job name: Build x86_64-pc-windows-msvc
+Build x86_64-pc-windows-msvc	Checkout repository	﻿2026-01-18T16:11:45.5673014Z ##[group]Run actions/checkout@v4
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5674014Z with:
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5674440Z   repository: anish-devgit/project-apex-nexus
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5675130Z   token: ***
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5675489Z   ssh-strict: true
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5675902Z   ssh-user: git
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5676416Z   persist-credentials: true
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5676835Z   clean: true
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5677205Z   sparse-checkout-cone-mode: true
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5677668Z   fetch-depth: 1
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5678012Z   fetch-tags: false
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5678376Z   show-progress: true
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5678735Z   lfs: false
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5679061Z   submodules: false
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5679446Z   set-safe-directory: true
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5680089Z env:
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5680426Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.5680849Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.7290596Z Syncing repository: anish-devgit/project-apex-nexus
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.7293064Z ##[group]Getting Git version info
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.7293980Z Working directory is 'D:\a\project-apex-nexus\project-apex-nexus'
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:45.8187185Z [command]"C:\Program Files\Git\bin\git.exe" version
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.6493757Z git version 2.52.0.windows.1
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.6546877Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.6567815Z Temporarily overriding HOME='D:\a\_temp\665b01ac-523c-4533-b1e5-d9a70b3a68ef' before making global git config changes
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.6570558Z Adding repository directory to the temporary git global config as a safe directory
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.6582426Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\project-apex-nexus\project-apex-nexus
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.7665092Z Deleting the contents of 'D:\a\project-apex-nexus\project-apex-nexus'
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.7671520Z ##[group]Initializing the repository
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.7682183Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\project-apex-nexus\project-apex-nexus
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.8981816Z Initialized empty Git repository in D:/a/project-apex-nexus/project-apex-nexus/.git/
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.9031415Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/anish-devgit/project-apex-nexus
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.9985703Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.9986996Z ##[group]Disabling automatic garbage collection
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:46.9995292Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:47.0338545Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:47.0340722Z ##[group]Setting up auth
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:47.0359407Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:47.0750430Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:49.3756413Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:49.4075139Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:49.9403785Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:49.9719068Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:50.5712931Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:50.6021904Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:50.6022613Z ##[group]Fetching the repository
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:50.6037745Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +db2a37482fad6b2d7876147a77d9708b595e88be:refs/tags/v0.1.0-alpha.3
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.1183044Z From https://github.com/anish-devgit/project-apex-nexus
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.1183903Z  * [new ref]         db2a37482fad6b2d7876147a77d9708b595e88be -> v0.1.0-alpha.3
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.1656649Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.1657718Z ##[group]Determining the checkout info
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.1660092Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.1672406Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.2347702Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.2721583Z ##[group]Checking out the ref
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.2733664Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force refs/tags/v0.1.0-alpha.3
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3700952Z Note: switching to 'refs/tags/v0.1.0-alpha.3'.
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3701374Z 
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3701726Z You are in 'detached HEAD' state. You can look around, make experimental
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3702550Z changes and commit them, and you can discard any commits you make in this
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3703335Z state without impacting any branches by switching back to a branch.
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3704108Z 
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3704453Z If you want to create a new branch to retain commits you create, you may
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3705232Z do so (now or later) by using -c with the switch command. Example:
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3705652Z 
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3705793Z   git switch -c <new-branch-name>
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3706051Z 
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3706173Z Or undo this operation with:
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3706436Z 
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3706543Z   git switch -
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3706712Z 
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3707031Z Turn off this advice by setting config variable advice.detachedHead to false
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3708561Z 
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.3708744Z HEAD is now at db2a374 release: v0.1.0-alpha.3
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.4265067Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.4273951Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+Build x86_64-pc-windows-msvc	Checkout repository	2026-01-18T16:11:52.4558131Z db2a37482fad6b2d7876147a77d9708b595e88be
+Build x86_64-pc-windows-msvc	Setup Node.js	﻿2026-01-18T16:11:52.4964468Z ##[group]Run actions/setup-node@v4
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:11:52.4964805Z with:
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:11:52.4964971Z   node-version: 20
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:11:52.4965132Z   cache: npm
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:11:52.4965387Z   cache-dependency-path: crates/nexus_binding/package-lock.json
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:11:52.4965705Z   always-auth: false
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:11:52.4965884Z   check-latest: false
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:11:52.4966185Z   token: ***
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:11:52.4966330Z env:
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:11:52.4966505Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:11:52.4966685Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:11:52.7376714Z Found in cache @ C:\hostedtoolcache\windows\node\20.19.6\x64
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:11:52.7391579Z ##[group]Environment details
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:12:01.5842801Z node: v20.19.6
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:12:01.5843150Z npm: 10.8.2
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:12:01.5843371Z yarn: 1.22.22
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:12:01.5845083Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:12:01.6889094Z [command]C:\Windows\system32\cmd.exe /D /S /C "C:\hostedtoolcache\windows\node\20.19.6\x64\npm.cmd config get cache"
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:12:02.6399156Z C:\npm\cache
+Build x86_64-pc-windows-msvc	Setup Node.js	2026-01-18T16:12:03.0001912Z npm cache is not found
+Build x86_64-pc-windows-msvc	Setup Rust	﻿2026-01-18T16:12:03.0410467Z ##[group]Run dtolnay/rust-toolchain@stable
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0411137Z with:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0411321Z   targets: x86_64-pc-windows-msvc
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0411540Z   toolchain: stable
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0411701Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0411836Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0412025Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0632039Z ##[group]Run : parse toolchain version
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0632442Z [36;1m: parse toolchain version[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0632864Z [36;1mif [[ -z $toolchain ]]; then[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0633715Z [36;1m  # GitHub does not enforce `required: true` inputs itself. https://github.com/actions/runner/issues/1070[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0634623Z [36;1m  echo "'toolchain' is a required input" >&2[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0635028Z [36;1m  exit 1[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0635321Z [36;1melif [[ $toolchain =~ ^stable' '[0-9]+' '(year|month|week|day)s?' 'ago$ ]]; then[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0635710Z [36;1m  if [[ Windows == macOS ]]; then[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0636265Z [36;1m    echo "toolchain=1.$((($(date -v-$(sed 's/stable \([0-9]*\) \(.\).*/\1\2/' <<< $toolchain) +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0636778Z [36;1m  else[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0637146Z [36;1m    echo "toolchain=1.$((($(date --date "${toolchain#stable }" +%s)/60/60/24-16569)/7/6))" >> $GITHUB_OUTPUT[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0637576Z [36;1m  fi[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0637820Z [36;1melif [[ $toolchain =~ ^stable' 'minus' '[0-9]+' 'releases?$ ]]; then[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0638672Z [36;1m  echo "toolchain=1.$((($(date +%s)/60/60/24-16569)/7/6-${toolchain//[^0-9]/}))" >> $GITHUB_OUTPUT[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0639112Z [36;1melif [[ $toolchain =~ ^1\.[0-9]+$ ]]; then[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0639598Z [36;1m  echo "toolchain=1.$((i=${toolchain#1.}, c=($(date +%s)/60/60/24-16569)/7/6, i+9*i*(10*i<=c)+90*i*(100*i<=c)))" >> $GITHUB_OUTPUT[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0640063Z [36;1melse[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0640262Z [36;1m  echo "toolchain=$toolchain" >> $GITHUB_OUTPUT[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0640526Z [36;1mfi[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0660621Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0661005Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0661155Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0661347Z   toolchain: stable
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.0661514Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.1543338Z ##[group]Run : construct rustup command line
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.1543643Z [36;1m: construct rustup command line[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.1544208Z [36;1mecho "targets=$(for t in ${targets//,/ }; do echo -n ' --target' $t; done)" >> $GITHUB_OUTPUT[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.1544810Z [36;1mecho "components=$(for c in ${components//,/ }; do echo -n ' --component' $c; done)" >> $GITHUB_OUTPUT[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.1545265Z [36;1mecho "downgrade=" >> $GITHUB_OUTPUT[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.1560401Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.1560778Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.1560942Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.1561147Z   targets: x86_64-pc-windows-msvc
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.1561349Z   components: 
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.1561502Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2356989Z ##[group]Run : set $CARGO_HOME
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2357240Z [36;1m: set $CARGO_HOME[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2357548Z [36;1mecho CARGO_HOME=${CARGO_HOME:-"$USERPROFILE\.cargo"} >> $GITHUB_ENV[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2372627Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2373017Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2373173Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2373362Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2966488Z ##[group]Run : install rustup if needed on windows
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2966823Z [36;1m: install rustup if needed on windows[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2967097Z [36;1mif ! command -v rustup &>/dev/null; then[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2967836Z [36;1m  curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://win.rustup.rs/x86_64 --output 'D:\a\_temp\rustup-init.exe'[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2971305Z [36;1m  'D:\a\_temp\rustup-init.exe' --default-toolchain none --no-modify-path -y[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2972083Z [36;1m  echo "$CARGO_HOME\bin" >> $GITHUB_PATH[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2972341Z [36;1mfi[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2987765Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2988153Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2988312Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2988531Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.2988759Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.3652304Z ##[group]Run rustup toolchain install stable --target x86_64-pc-windows-msvc --profile minimal --no-self-update
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.3653071Z [36;1mrustup toolchain install stable --target x86_64-pc-windows-msvc --profile minimal --no-self-update[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.3671660Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.3672270Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.3672423Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.3672635Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.3672889Z   RUSTUP_PERMIT_COPY_RENAME: 1
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:03.3673098Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:11.0654815Z info: syncing channel updates for 'stable-x86_64-pc-windows-msvc'
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.0483588Z info: latest update on 2025-12-11, rust version 1.92.0 (ded5c06cf 2025-12-08)
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.1160165Z info: component 'rust-std' for target 'x86_64-pc-windows-msvc' is up to date
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.1188492Z 
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.1394919Z   stable-x86_64-pc-windows-msvc unchanged - rustc 1.92.0 (ded5c06cf 2025-12-08)
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.1397222Z 
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.1616276Z ##[group]Run rustup default stable
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.1616529Z [36;1mrustup default stable[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.1632944Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.1633341Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.1633486Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.1633700Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.1633932Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.2462601Z info: using existing install for 'stable-x86_64-pc-windows-msvc'
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3148476Z info: default toolchain set to 'stable-x86_64-pc-windows-msvc'
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3149054Z 
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3360738Z   stable-x86_64-pc-windows-msvc unchanged - rustc 1.92.0 (ded5c06cf 2025-12-08)
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3361741Z 
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3665079Z ##[group]Run : create cachekey
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3665349Z [36;1m: create cachekey[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3665845Z [36;1mDATE=$(rustc +stable --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3666975Z [36;1mHASH=$(rustc +stable --version --verbose | sed -ne 's/^commit-hash: //p')[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3668068Z [36;1mecho "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3686307Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3686696Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3686843Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3687061Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:12.3687284Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1303928Z ##[group]Run : disable incremental compilation
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1304248Z [36;1m: disable incremental compilation[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1304545Z [36;1mif [ -z "${CARGO_INCREMENTAL+set}" ]; then[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1304846Z [36;1m  echo CARGO_INCREMENTAL=0 >> $GITHUB_ENV[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1305091Z [36;1mfi[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1319222Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1320152Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1320395Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1320748Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1321819Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1879184Z ##[group]Run : enable colors in Cargo output
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1879493Z [36;1m: enable colors in Cargo output[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1879759Z [36;1mif [ -z "${CARGO_TERM_COLOR+set}" ]; then[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1880057Z [36;1m  echo CARGO_TERM_COLOR=always >> $GITHUB_ENV[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1880304Z [36;1mfi[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1897191Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1897571Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1897775Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1898145Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1898539Z   CARGO_INCREMENTAL: 0
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.1898822Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2471045Z ##[group]Run : enable Cargo sparse registry
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2471353Z [36;1m: enable Cargo sparse registry[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2471683Z [36;1m# implemented in 1.66, stabilized in 1.68, made default in 1.70[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2472385Z [36;1mif [ -z "${CARGO_REGISTRIES_CRATES_IO_PROTOCOL+set}" -o -f "D:\a\_temp"/.implicit_cargo_registries_crates_io_protocol ]; then[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2473049Z [36;1m  if rustc +stable --version --verbose | grep -q '^release: 1\.6[89]\.'; then[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2473539Z [36;1m    touch "D:\a\_temp"/.implicit_cargo_registries_crates_io_protocol || true[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2474012Z [36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse >> $GITHUB_ENV[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2474488Z [36;1m  elif rustc +stable --version --verbose | grep -q '^release: 1\.6[67]\.'; then[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2474988Z [36;1m    touch "D:\a\_temp"/.implicit_cargo_registries_crates_io_protocol || true[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2475420Z [36;1m    echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git >> $GITHUB_ENV[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2475725Z [36;1m  fi[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2475960Z [36;1mfi[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2492094Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2492502Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2492657Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2492867Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2493107Z   CARGO_INCREMENTAL: 0
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.2493287Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.4910540Z ##[group]Run : work around spurious network errors in curl 8.0
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.4910946Z [36;1m: work around spurious network errors in curl 8.0[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.4911461Z [36;1m# https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.4912792Z [36;1mif rustc +stable --version --verbose | grep -q '^release: 1\.7[01]\.'; then[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.4913244Z [36;1m  echo CARGO_HTTP_MULTIPLEXING=false >> $GITHUB_ENV[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.4913532Z [36;1mfi[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.4927694Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.4928066Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.4928217Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.4928440Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.4928677Z   CARGO_INCREMENTAL: 0
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.4928846Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.6327426Z ##[group]Run rustc +stable --version --verbose
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.6327734Z [36;1mrustc +stable --version --verbose[0m
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.6347553Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.6348167Z env:
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.6348397Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.6348764Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.6349160Z   CARGO_INCREMENTAL: 0
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.6349452Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.7248964Z rustc 1.92.0 (ded5c06cf 2025-12-08)
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.7249488Z binary: rustc
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.7249834Z commit-hash: ded5c06cf21d2b93bffd5d884aa6e96934ee4234
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.7250149Z commit-date: 2025-12-08
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.7250609Z host: x86_64-pc-windows-msvc
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.7251278Z release: 1.92.0
+Build x86_64-pc-windows-msvc	Setup Rust	2026-01-18T16:12:14.7252759Z LLVM version: 21.1.3
+Build x86_64-pc-windows-msvc	Install dependencies	﻿2026-01-18T16:12:14.7534287Z ##[group]Run npm ci
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:14.7534660Z [36;1mnpm ci[0m
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:14.8046572Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:14.8046906Z env:
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:14.8047068Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:14.8047278Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:14.8047514Z   CARGO_INCREMENTAL: 0
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:14.8047702Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:28.8842097Z npm notice Access token expired or revoked. Please try logging in again.
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:28.9103143Z npm notice Access token expired or revoked. Please try logging in again.
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:28.9348008Z npm notice Access token expired or revoked. Please try logging in again.
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:28.9558359Z npm notice Access token expired or revoked. Please try logging in again.
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:32.5390174Z 
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:32.5390903Z added 69 packages, and audited 70 packages in 8s
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:32.5391329Z 
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:32.5391532Z 12 packages are looking for funding
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:32.5392120Z   run `npm fund` for details
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:32.5402961Z 
+Build x86_64-pc-windows-msvc	Install dependencies	2026-01-18T16:12:32.5403209Z found 0 vulnerabilities
+Build x86_64-pc-windows-msvc	Build native binding	﻿2026-01-18T16:12:33.5483839Z ##[group]Run npx napi build --platform --release --target x86_64-pc-windows-msvc
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:12:33.5484486Z [36;1mnpx napi build --platform --release --target x86_64-pc-windows-msvc[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:12:33.5570524Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:12:33.5571046Z env:
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:12:33.5571293Z   CARGO_TERM_COLOR: always
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:12:33.5571554Z   CARGO_HOME: C:\Users\runneradmin\.cargo
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:12:33.5571861Z   CARGO_INCREMENTAL: 0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:12:33.5572080Z ##[endgroup]
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:06.8168965Z [33m[DEPRECATED] napi.name is deprecated, use napi.binaryName instead.[39m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:06.8171229Z [33m[DEPRECATED] napi.triples is deprecated, use napi.targets instead.[39m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:08.5588633Z [1m[92m   Compiling[0m proc-macro2 v1.0.105
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:08.5589396Z [1m[92m   Compiling[0m quote v1.0.43
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:08.5590508Z [1m[92m   Compiling[0m unicode-ident v1.0.22
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:08.5591457Z [1m[92m   Compiling[0m cfg-if v1.0.4
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:17.7419032Z [1m[92m   Compiling[0m itoa v1.0.17
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:21.2535625Z [1m[92m   Compiling[0m windows-link v0.2.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:21.3576464Z [1m[92m   Compiling[0m smallvec v1.15.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:23.2925172Z [1m[92m   Compiling[0m version_check v0.9.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:23.7439953Z [1m[92m   Compiling[0m rand_core v0.6.4
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:24.0405862Z [1m[92m   Compiling[0m siphasher v1.0.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:24.2562187Z [1m[92m   Compiling[0m phf_shared v0.11.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:24.6728203Z [1m[92m   Compiling[0m rand v0.8.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:25.6047955Z [1m[92m   Compiling[0m phf_generator v0.11.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:25.6855333Z [1m[92m   Compiling[0m once_cell v1.21.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:26.0090474Z [1m[92m   Compiling[0m thiserror v1.0.69
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:26.0748772Z [1m[92m   Compiling[0m serde_core v1.0.228
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:26.3219149Z [1m[92m   Compiling[0m pin-project-lite v0.2.16
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:26.4432907Z [1m[92m   Compiling[0m windows-sys v0.61.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:26.5570379Z [1m[92m   Compiling[0m parking_lot_core v0.9.12
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:26.8176341Z [1m[92m   Compiling[0m windows_x86_64_msvc v0.53.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:27.0572553Z [1m[92m   Compiling[0m rustversion v1.0.22
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:27.3233057Z [1m[92m   Compiling[0m memchr v2.7.6
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:29.1190817Z [1m[92m   Compiling[0m syn v2.0.114
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:30.8942592Z [1m[92m   Compiling[0m scopeguard v1.2.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:31.0070261Z [1m[92m   Compiling[0m rustc-hash v2.1.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:31.1329684Z [1m[92m   Compiling[0m lock_api v0.4.14
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:32.2995525Z [1m[92m   Compiling[0m bytes v1.11.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:32.3475251Z [1m[92m   Compiling[0m owo-colors v4.2.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:32.8029359Z [1m[92m   Compiling[0m windows-targets v0.53.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:32.8516983Z [1m[92m   Compiling[0m log v0.4.29
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:33.1004599Z [1m[92m   Compiling[0m ryu v1.0.22
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:33.2414733Z [1m[92m   Compiling[0m futures-core v0.3.31
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:33.4052332Z [1m[92m   Compiling[0m unicode-width v0.2.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:33.6865833Z [1m[92m   Compiling[0m allocator-api2 v0.2.21
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:33.8782859Z [1m[92m   Compiling[0m unicode-linebreak v0.1.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:34.2408711Z [1m[92m   Compiling[0m smawk v0.3.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:34.2857097Z [1m[92m   Compiling[0m windows-sys v0.60.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:34.4117176Z [1m[92m   Compiling[0m textwrap v0.16.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:36.4925394Z [1m[92m   Compiling[0m futures-sink v0.3.31
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:36.6017592Z [1m[92m   Compiling[0m bitflags v2.10.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:37.3241584Z [1m[92m   Compiling[0m simdutf8 v0.1.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:37.3783124Z [1m[92m   Compiling[0m hashbrown v0.15.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:38.0385481Z [1m[92m   Compiling[0m thiserror-impl v1.0.69
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:38.1674414Z [1m[92m   Compiling[0m phf_macros v0.11.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:38.3468523Z [1m[92m   Compiling[0m oxc-miette-derive v1.0.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:38.5376814Z [1m[92m   Compiling[0m bumpalo v3.19.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:39.1496986Z [1m[92m   Compiling[0m phf v0.11.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:39.3720977Z [1m[92m   Compiling[0m castaway v0.2.4
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:39.5172455Z [1m[92m   Compiling[0m getrandom v0.2.17
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:39.7360956Z [1m[92m   Compiling[0m static_assertions v1.1.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:39.8126198Z [1m[92m   Compiling[0m syn v1.0.109
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:39.8596979Z [1m[92m   Compiling[0m equivalent v1.0.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:39.9642785Z [1m[92m   Compiling[0m hashbrown v0.16.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:40.1849311Z [1m[92m   Compiling[0m crossbeam-utils v0.8.21
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:40.1876874Z [1m[92m   Compiling[0m cow-utils v0.1.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:40.3113717Z [1m[92m   Compiling[0m oxc-miette v1.0.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:40.6244456Z [1m[92m   Compiling[0m compact_str v0.8.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:40.7396664Z [1m[92m   Compiling[0m oxc_allocator v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:41.0540330Z [1m[92m   Compiling[0m indexmap v2.13.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:41.1226897Z [1m[92m   Compiling[0m oxc_ast_macros v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:41.7621102Z [1m[92m   Compiling[0m futures-channel v0.3.31
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:42.1249422Z [1m[92m   Compiling[0m zerocopy v0.8.33
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:42.5733332Z [1m[92m   Compiling[0m oxc_estree v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:42.6230457Z [1m[92m   Compiling[0m serde v1.0.228
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:42.6451210Z [1m[92m   Compiling[0m pin-utils v0.1.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:42.7065581Z [1m[92m   Compiling[0m typenum v1.19.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:43.1134457Z [1m[92m   Compiling[0m oxc_span v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:43.6518378Z [1m[92m   Compiling[0m serde_derive v1.0.228
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:44.6200725Z [1m[92m   Compiling[0m tokio-macros v2.6.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:45.7787001Z [1m[92m   Compiling[0m socket2 v0.6.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:47.7893279Z [1m[92m   Compiling[0m http v1.4.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:48.3240218Z [1m[92m   Compiling[0m parking_lot v0.12.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:49.7852514Z [1m[92m   Compiling[0m mio v1.1.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:50.4399741Z [1m[92m   Compiling[0m generic-array v0.14.7
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:50.7012583Z [1m[92m   Compiling[0m assert-unchecked v0.1.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:50.7666214Z [1m[92m   Compiling[0m autocfg v1.5.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:51.3752899Z [1m[92m   Compiling[0m zmij v1.0.15
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:51.6967490Z [1m[92m   Compiling[0m unicode-id-start v1.4.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:51.8616497Z [1m[92m   Compiling[0m num-traits v0.2.19
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:52.0271191Z [1m[92m   Compiling[0m tokio v1.49.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:53.1681577Z [1m[92m   Compiling[0m futures-macro v0.3.31
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:53.2644590Z [1m[92m   Compiling[0m tracing-core v0.1.36
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:54.5373522Z [1m[92m   Compiling[0m ryu-js v1.0.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:55.2938256Z [1m[92m   Compiling[0m oxc_index v3.1.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:55.3636964Z [1m[92m   Compiling[0m slab v0.4.11
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:55.6023573Z [1m[92m   Compiling[0m futures-io v0.3.31
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:55.8280773Z [1m[92m   Compiling[0m nonmax v0.5.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:55.9763627Z [1m[92m   Compiling[0m futures-task v0.3.31
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:56.1684695Z [1m[92m   Compiling[0m serde_json v1.0.149
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:56.2412513Z [1m[92m   Compiling[0m oxc_syntax v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:56.4197215Z [1m[92m   Compiling[0m futures-util v0.3.31
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:58.0009044Z [1m[92m   Compiling[0m oxc_diagnostics v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:13:58.2273711Z [1m[92m   Compiling[0m tracing-attributes v0.1.31
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:00.2552765Z [1m[92m   Compiling[0m either v1.15.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:00.3247891Z [1m[92m   Compiling[0m httparse v1.10.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:00.5483818Z [1m[92m   Compiling[0m tracing v0.1.44
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:00.7788459Z [1m[92m   Compiling[0m oxc_regular_expression v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:02.9221416Z [1m[92m   Compiling[0m http-body v1.0.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:03.0829384Z [1m[92m   Compiling[0m ahash v0.7.8
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:03.3825189Z [1m[92m   Compiling[0m num-integer v0.1.46
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:04.3332323Z [1m[92m   Compiling[0m oxc_ast v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:07.8535991Z [1m[92m   Compiling[0m crypto-common v0.1.7
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:07.9871776Z [1m[92m   Compiling[0m block-buffer v0.10.4
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:08.1422149Z [1m[92m   Compiling[0m ppv-lite86 v0.2.21
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:08.5357989Z [1m[92m   Compiling[0m unicode-segmentation v1.12.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:08.7398122Z [1m[92m   Compiling[0m windows_x86_64_msvc v0.48.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:08.9780284Z [1m[92m   Compiling[0m dtoa v1.0.11
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:09.1050515Z [1m[92m   Compiling[0m tower-service v0.3.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:09.1402798Z [1m[92m   Compiling[0m dtoa-short v0.3.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:09.1829142Z [1m[92m   Compiling[0m convert_case v0.6.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:09.3423069Z [1m[92m   Compiling[0m rand_chacha v0.3.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:09.6559568Z [1m[92m   Compiling[0m digest v0.10.7
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:09.9272606Z [1m[92m   Compiling[0m num-bigint v0.4.6
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:10.9622734Z [1m[92m   Compiling[0m ptr_meta_derive v0.1.4
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:11.3970480Z [1m[92m   Compiling[0m crossbeam-epoch v0.9.18
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:12.0649015Z [1m[92m   Compiling[0m cssparser-macros v0.6.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:12.6062807Z [1m[92m   Compiling[0m phf_codegen v0.11.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:12.7320936Z [1m[92m   Compiling[0m data-encoding v2.10.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:17.8075861Z [1m[92m   Compiling[0m tower-layer v0.3.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:17.8493953Z [1m[92m   Compiling[0m rayon-core v1.13.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:18.0646527Z [1m[92m   Compiling[0m unicase v2.9.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:18.1664464Z [1m[92m   Compiling[0m percent-encoding v2.3.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:18.2965534Z [1m[92m   Compiling[0m outref v0.1.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:18.3906090Z [1m[92m   Compiling[0m str_indices v0.4.4
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:18.5343661Z [1m[92m   Compiling[0m cpufeatures v0.2.17
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:18.5972060Z [1m[92m   Compiling[0m mime v0.3.17
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:18.6274968Z [1m[92m   Compiling[0m hashbrown v0.14.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:19.4877063Z [1m[92m   Compiling[0m rkyv v0.7.46
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:19.7057660Z [1m[92m   Compiling[0m httpdate v1.0.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:19.7402686Z [1m[92m   Compiling[0m fixedbitset v0.5.7
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:20.3989599Z [1m[92m   Compiling[0m getrandom v0.3.4
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:20.6281321Z [1m[92m   Compiling[0m aho-corasick v1.1.4
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:20.7485368Z [1m[92m   Compiling[0m petgraph v0.7.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:20.8428688Z [1m[92m   Compiling[0m ropey v1.6.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:20.9705444Z [1m[92m   Compiling[0m sha1 v0.10.6
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:21.7742967Z [1m[92m   Compiling[0m simd-abstraction v0.7.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:22.3629085Z [1m[92m   Compiling[0m mime_guess v2.0.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:23.1034381Z [1m[92m   Compiling[0m parcel_selectors v0.28.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:23.5937592Z [1m[92m   Compiling[0m cssparser v0.33.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:23.6903766Z [1m[92m   Compiling[0m oxc_ecmascript v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:24.8570825Z [1m[92m   Compiling[0m crossbeam-deque v0.8.6
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:25.1261194Z [1m[92m   Compiling[0m ptr_meta v0.1.4
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:25.2368526Z [1m[92m   Compiling[0m hashbrown v0.12.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:26.1886448Z [1m[92m   Compiling[0m http-body-util v0.1.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:26.1943572Z [1m[92m   Compiling[0m itertools v0.14.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:26.5578693Z [1m[92m   Compiling[0m rkyv_derive v0.7.46
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:27.0246307Z [1m[92m   Compiling[0m winapi-util v0.1.11
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:27.3885243Z [1m[92m   Compiling[0m ahash v0.8.12
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:27.6267029Z [1m[92m   Compiling[0m outref v0.5.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:27.7160448Z [1m[92m   Compiling[0m atomic-waker v1.1.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:27.8343094Z [1m[92m   Compiling[0m matches v0.1.10
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:27.8925593Z [1m[92m   Compiling[0m seahash v4.1.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:28.2487848Z [1m[92m   Compiling[0m sync_wrapper v1.0.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:28.3381364Z [1m[92m   Compiling[0m libc v0.2.180
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:28.8302715Z [1m[92m   Compiling[0m utf-8 v0.7.6
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:28.8342101Z [1m[92m   Compiling[0m vsimd v0.8.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:29.0561637Z [1m[92m   Compiling[0m regex-syntax v0.8.8
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:29.2772185Z [1m[92m   Compiling[0m byteorder v1.5.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:29.5457740Z [1m[92m   Compiling[0m lazy_static v1.5.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:29.6307301Z [1m[92m   Compiling[0m oxc_sourcemap v3.0.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:29.8530746Z [1m[92m   Compiling[0m tungstenite v0.24.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:33.2200621Z [1m[92m   Compiling[0m regex-automata v0.4.13
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:35.4588930Z [1m[92m   Compiling[0m base64-simd v0.8.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:36.4007418Z [1m[92m   Compiling[0m oxc_cfg v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:38.6595073Z [1m[92m   Compiling[0m data-url v0.1.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:39.6408431Z [1m[92m   Compiling[0m hyper v1.8.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:40.9232694Z [1m[92m   Compiling[0m same-file v1.0.6
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:41.4147231Z [1m[92m   Compiling[0m windows-targets v0.48.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:44.1830566Z [1m[92m   Compiling[0m base64-simd v0.7.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:45.1845310Z [1m[92m   Compiling[0m oxc_data_structures v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:45.7864846Z [1m[92m   Compiling[0m form_urlencoded v1.2.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:45.8217608Z [1m[92m   Compiling[0m oxc_ast_visit v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:46.1571310Z [1m[92m   Compiling[0m const-str-proc-macro v0.3.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:46.8501025Z [1m[92m   Compiling[0m async-trait v0.1.89
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:47.5492316Z [1m[92m   Compiling[0m vlq v0.5.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:47.6201088Z [1m[92m   Compiling[0m precomputed-hash v0.1.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:47.6668636Z [1m[92m   Compiling[0m self_cell v1.2.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:47.7667908Z [1m[92m   Compiling[0m oxc_semantic v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:48.4442855Z [1m[92m   Compiling[0m axum-core v0.4.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:50.5378239Z [1m[92m   Compiling[0m parcel_sourcemap v2.1.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:54.4002468Z [1m[92m   Compiling[0m const-str v0.3.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:55.2739458Z [1m[92m   Compiling[0m serde_urlencoded v0.7.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:55.5430000Z [1m[92m   Compiling[0m rayon v1.11.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:55.6426986Z [1m[92m   Compiling[0m windows-sys v0.48.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:55.6652673Z [1m[92m   Compiling[0m hyper-util v0.1.19
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:56.2146247Z [1m[92m   Compiling[0m walkdir v2.5.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:57.9483046Z [1m[92m   Compiling[0m matchers v0.2.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:58.2402900Z [1m[92m   Compiling[0m regex v1.12.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:58.8648743Z [1m[92m   Compiling[0m tokio-tungstenite v0.24.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:59.2770322Z [1m[92m   Compiling[0m sharded-slab v0.1.7
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:14:59.6099073Z [1m[92m   Compiling[0m tower v0.5.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:00.2879524Z [1m[92m   Compiling[0m cssparser-color v0.1.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:00.2904044Z [1m[92m   Compiling[0m dashmap v6.1.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:01.2745303Z [1m[92m   Compiling[0m dashmap v5.5.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:01.6429856Z [1m[92m   Compiling[0m lightningcss-derive v1.0.0-alpha.43
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:02.2669622Z [1m[92m   Compiling[0m futures-executor v0.3.31
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:03.0444375Z [1m[92m   Compiling[0m itertools v0.10.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:03.2039184Z [1m[92m   Compiling[0m tokio-util v0.7.18
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:03.9724724Z [1m[92m   Compiling[0m tracing-log v0.2.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:04.6225884Z [1m[92m   Compiling[0m serde-content v0.1.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:04.6975971Z [1m[92m   Compiling[0m crossbeam-channel v0.5.15
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:05.3431370Z [1m[92m   Compiling[0m filetime v0.2.26
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:05.5753873Z [1m[92m   Compiling[0m serde_path_to_error v0.1.20
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:05.9284343Z [1m[92m   Compiling[0m nu-ansi-term v0.50.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:06.3373369Z [1m[92m   Compiling[0m json-strip-comments v1.0.4
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:06.5542111Z [1m[92m   Compiling[0m libloading v0.8.9
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:06.6229979Z [1m[92m   Compiling[0m thread_local v1.1.9
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:06.9473069Z [1m[92m   Compiling[0m semver v1.0.27
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:07.1486177Z [1m[92m   Compiling[0m matchit v0.7.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:07.1604149Z [1m[92m   Compiling[0m base64 v0.22.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:07.3744909Z [1m[92m   Compiling[0m seq-macro v0.3.6
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:07.9598648Z [1m[92m   Compiling[0m http-range-header v0.4.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:08.0219529Z [1m[92m   Compiling[0m napi-build v2.3.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:08.0276851Z [1m[92m   Compiling[0m pathdiff v0.2.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:08.1256770Z [1m[92m   Compiling[0m dunce v1.0.5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:08.2530156Z [1m[92m   Compiling[0m pastey v0.1.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:08.4397728Z [1m[92m   Compiling[0m nexus_binding v0.1.0 (D:\a\project-apex-nexus\project-apex-nexus\crates\nexus_binding)
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:08.4647457Z [1m[92m   Compiling[0m oxc_resolver v1.12.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:08.6475397Z [1m[92m   Compiling[0m tower-http v0.5.2
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:08.7823916Z [1m[92m   Compiling[0m oxc_parser v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:08.9808260Z [1m[92m   Compiling[0m lightningcss v1.0.0-alpha.68
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:13.4149563Z [1m[92m   Compiling[0m axum v0.7.9
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:16.6757908Z [1m[92m   Compiling[0m napi-derive-backend v1.0.75
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:19.6332125Z [1m[92m   Compiling[0m tracing-subscriber v0.3.22
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:27.9836946Z [1m[92m   Compiling[0m napi-sys v2.4.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:28.0256200Z [1m[92m   Compiling[0m notify v6.1.1
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:29.9703501Z [1m[92m   Compiling[0m oxc_codegen v0.54.0
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:32.2854738Z [1m[92m   Compiling[0m futures v0.3.31
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:32.3583771Z [1m[92m   Compiling[0m ctor v0.2.9
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:33.1207713Z [1m[92m   Compiling[0m urlencoding v2.1.3
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:33.4475152Z [1m[92m   Compiling[0m base64 v0.21.7
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.3280369Z [1m[92m   Compiling[0m nexus_core v0.1.0-alpha (D:\a\project-apex-nexus\project-apex-nexus\crates\nexus_core)
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.5764628Z [1m[93mwarning[0m[1m[97m: unused import: `collections::HashMap`[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.5873701Z   [1m[96m--> [0mcrates\nexus_core\src\lib.rs:10:5
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.5952543Z    [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6010829Z [1m[96m10[0m [1m[96m|[0m     collections::HashMap,
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6092313Z    [1m[96m|[0m     [1m[93m^^^^^^^^^^^^^^^^^^^^[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6189338Z    [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6242639Z    [1m[96m= [0m[1m[97mnote[0m: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6244508Z 
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6245521Z [1m[93mwarning[0m[1m[97m: unused import: `ModuleDeclaration`[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6269229Z  [1m[96m--> [0mcrates\nexus_core\src\parser.rs:4:20
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6328447Z   [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6429391Z [1m[96m4[0m [1m[96m|[0m use oxc_ast::ast::{ModuleDeclaration, ImportDeclarationSpecifier}; // Adjust based on exact structure if needed
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6569273Z   [1m[96m|[0m                    [1m[93m^^^^^^^^^^^^^^^^^[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6613018Z 
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6647802Z [1m[93mwarning[0m[1m[97m: unused import: `compile_css`[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6749133Z   [1m[96m--> [0mcrates\nexus_core\src\lib.rs:22:25
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6885969Z    [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6945580Z [1m[96m22[0m [1m[96m|[0m use compiler::{compile, compile_css};
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.6980693Z    [1m[96m|[0m                         [1m[93m^^^^^^^^^^^[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:34.7083174Z 
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.0302709Z [1m[91merror[E0271][0m[1m[97m: expected `{async block@crates\nexus_core\src\lib.rs:468:9: 468:19}` to be a future that resolves to `Result<_, Infallible>`, but it resolves to `Result<Response<Body>, Error>`[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.0313027Z    [1m[96m--> [0mcrates\nexus_core\src\lib.rs:502:27
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.0314132Z     [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.0315162Z [1m[96m502[0m [1m[96m|[0m         .fallback_service(service)
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.0318235Z     [1m[96m|[0m          [1m[96m----------------[0m [1m[91m^^^^^^^[0m [1m[91mexpected `Result<Response<Body>, Infallible>`, found `Result<Response<Body>, Error>`[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.0476232Z     [1m[96m|[0m          [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.0636285Z     [1m[96m|[0m          [1m[96mrequired by a bound introduced by this call[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.0639644Z     [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.0775100Z     [1m[96m= [0m[1m[97mnote[0m: expected enum `Result<_, [1m[35mInfallible[0m>`
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.0796954Z                found enum `Result<_, [1m[35mstd::io::Error[0m>`
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.0965381Z     [1m[96m= [0m[1m[97mnote[0m: required for `ServiceFn<{closure@crates\nexus_core\src\lib.rs:464:37: 464:71}>` to implement `Service<axum::http::Request<Body>>`
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.1007584Z [1m[92mnote[0m: required by a bound in `Router::<S>::fallback_service`
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.1130452Z    [1m[96m--> [0mC:\Users\runneradmin\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\axum-0.7.9\src\routing\mod.rs:339:29
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.1131576Z     [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.1302885Z [1m[96m337[0m [1m[96m|[0m     pub fn fallback_service<T>(self, service: T) -> Self
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.1305618Z     [1m[96m|[0m            [1m[96m----------------[0m [1m[96mrequired by a bound in this associated function[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.1344271Z [1m[96m338[0m [1m[96m|[0m     where
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.1465291Z [1m[96m339[0m [1m[96m|[0m         T: Service<Request, Error = Infallible> + Clone + Send + 'static,
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.1623210Z     [1m[96m|[0m                             [1m[92m^^^^^^^^^^^^^^^^^^[0m [1m[92mrequired by this bound in `Router::<S>::fallback_service`[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.1664374Z 
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2658007Z [1m[93mwarning[0m[1m[97m: unused variable: `project_root`[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2762853Z   [1m[96m--> [0mcrates\nexus_core\src\resolver.rs:11:16
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2916079Z    [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2924401Z [1m[96m11[0m [1m[96m|[0m     pub fn new(project_root: &Path) -> Self {
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2926234Z    [1m[96m|[0m                [1m[93m^^^^^^^^^^^^[0m [1m[93mhelp: if this is intentional, prefix it with an underscore: `_project_root`[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2927517Z    [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2928625Z    [1m[96m= [0m[1m[97mnote[0m: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2929653Z 
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2930522Z [1m[93mwarning[0m[1m[97m: variable `module_id` is assigned to, but never used[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2931724Z    [1m[96m--> [0mcrates\nexus_core\src\lib.rs:168:9
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2932539Z     [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2933257Z [1m[96m168[0m [1m[96m|[0m     let module_id;
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2934138Z     [1m[96m|[0m         [1m[93m^^^^^^^^^[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2934874Z     [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2935723Z     [1m[96m= [0m[1m[97mnote[0m: consider using `_module_id` instead
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2936416Z 
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2937191Z [1m[93mwarning[0m[1m[97m: unused variable: `normalized_abs`[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2938266Z    [1m[96m--> [0mcrates\nexus_core\src\lib.rs:231:26
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2939479Z     [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2940917Z [1m[96m231[0m [1m[96m|[0m                      let normalized_abs = resolved_abs_path.to_string_lossy(); // normalize slashes?
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2942818Z     [1m[96m|[0m                          [1m[93m^^^^^^^^^^^^^^[0m [1m[93mhelp: if this is intentional, prefix it with an underscore: `_normalized_abs`[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2943852Z 
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2944563Z [1m[93mwarning[0m[1m[97m: value assigned to `module_id` is never read[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2945552Z    [1m[96m--> [0mcrates\nexus_core\src\lib.rs:184:9
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2946215Z     [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2946953Z [1m[96m184[0m [1m[96m|[0m         module_id = current_id;
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2947809Z     [1m[96m|[0m         [1m[93m^^^^^^^^^^^^^^^^^^^^^^[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2948805Z     [1m[96m|[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2949544Z     [1m[96m= [0m[1m[97mhelp[0m: maybe it is overwritten before being read?
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2950800Z     [1m[96m= [0m[1m[97mnote[0m: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.2951618Z 
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.3537844Z [1m[97mFor more information about this error, try `rustc --explain E0271`.[0m
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.3640239Z [1m[93mwarning[0m: `nexus_core` (lib) generated 7 warnings
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.3642489Z [1m[91merror[0m: could not compile `nexus_core` (lib) due to 1 previous error; 7 warnings emitted
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:15:35.3644362Z [1m[93mwarning[0m: build failed, waiting for other jobs to finish...
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:16:29.0601521Z [31m[1mInternal Error[22m[39m: Build failed with exit code 101
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:16:29.0603253Z     at ChildProcess.<anonymous> (file:///D:/a/project-apex-nexus/project-apex-nexus/crates/nexus_binding/node_modules/@napi-rs/cli/dist/cli.js:1304:36)
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:16:29.0604511Z     at Object.onceWrapper (node:events:639:26)
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:16:29.0605034Z     at ChildProcess.emit (node:events:536:35)
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:16:29.0606017Z     at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+Build x86_64-pc-windows-msvc	Build native binding	2026-01-18T16:16:29.1877663Z ##[error]Process completed with exit code 1.
+Build x86_64-pc-windows-msvc	Post Checkout repository	﻿2026-01-18T16:16:29.2096075Z Post job cleanup.
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:29.4384703Z [command]"C:\Program Files\Git\bin\git.exe" version
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:29.4658195Z git version 2.52.0.windows.1
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:29.4738380Z Temporarily overriding HOME='D:\a\_temp\abb9d92e-2c7b-4837-8468-e4c815c41f80' before making global git config changes
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:29.4739873Z Adding repository directory to the temporary git global config as a safe directory
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:29.4752338Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\project-apex-nexus\project-apex-nexus
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:29.5064264Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:29.5367011Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:30.0669079Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:30.0935762Z http.https://github.com/.extraheader
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:30.0976241Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:30.1270893Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:30.6518108Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build x86_64-pc-windows-msvc	Post Checkout repository	2026-01-18T16:16:30.6812187Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+Build x86_64-pc-windows-msvc	Complete job	﻿2026-01-18T16:16:31.2370638Z Cleaning up orphan processes
