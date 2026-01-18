@@ -1,14 +1,29 @@
 {
-    "name": "nexus",
-    "version": "0.1.0",
-    "main": "index.js",
+    "name": "@apexjs/nexus",
+    "version": "0.1.0-alpha.2",
+    "description": "Nexus Build OS - Ultra-fast frontend tooling",
+    "main": "bin/nexus.js",
     "bin": {
         "nexus": "./bin/nexus.js"
     },
-    "scripts": {
-        "build": "napi build --platform --release ../../crates/nexus_binding"
-    },
     "dependencies": {
-        "@napi-rs/cli": "^3.0.0"
+        "@apexjs/core": "0.1.0-alpha.2"
+    },
+    "keywords": [
+        "bundler",
+        "build",
+        "vite",
+        "webpack",
+        "rollup",
+        "frontend",
+        "tooling"
+    ],
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/user/project-apex"
+    },
+    "engines": {
+        "node": ">= 16"
     }
 }

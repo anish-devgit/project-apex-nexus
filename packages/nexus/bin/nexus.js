@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { startServer } = require('../index.js');
+const { startServer } = require('@apexjs/core');
 const path = require('path');
 
 const args = process.argv.slice(2);

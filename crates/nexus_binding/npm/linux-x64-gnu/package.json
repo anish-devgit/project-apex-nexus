@@ -1,0 +1,26 @@
+{
+  "name": "@apexjs/core-linux-x64-gnu",
+  "version": "0.1.0",
+  "cpu": [
+    "x64"
+  ],
+  "main": "nexus_binding.linux-x64-gnu.node",
+  "files": [
+    "nexus_binding.linux-x64-gnu.node"
+  ],
+  "description": "Nexus Build OS - Native Core Engine",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">= 16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/project-apex"
+  },
+  "os": [
+    "linux"
+  ],
+  "libc": [
+    "glibc"
+  ]
+}

@@ -10,6 +10,9 @@ crate-type = ["cdylib"]
 napi = { version = "2.14", features = ["tokio_rt"] }
 napi-derive = "2.14"
 nexus_core = { path = "../nexus_core" }
+tokio = { version = "1.0", features = ["rt"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [build-dependencies]
 napi-build = "2"

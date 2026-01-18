@@ -9,16 +9,23 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 crossbeam-channel = "0.5"
 notify = "6.0"
-axum = { version = "0.7", features = ["ws"] } # WebSocket support
+axum = { version = "0.7", features = ["ws"] }
 tower-http = { version = "0.5", features = ["fs", "cors", "trace"] }
+tower = "0.5"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 futures = "0.3"
-oxc_allocator = "0.13.0"
-oxc_parser = "0.13.0"
-oxc_span = "0.13.0"
-oxc_ast = "0.13.0"
-oxc_codegen = "0.13.0"
+mime_guess = "2.0"
+lightningcss = "1.0.0-alpha.57"
+base64 = "0.21"
+urlencoding = "2.1"
+oxc_allocator = "0.54"
+oxc_parser = "0.54"
+oxc_span = "0.54"
+oxc_ast = "0.54"
+oxc_codegen = "0.54"
+oxc_ast_visit = "0.54"
+oxc_resolver = "1.10"
 
 [dev-dependencies]
 tempfile = "3.8"

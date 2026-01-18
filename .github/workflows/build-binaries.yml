@@ -1,0 +1,132 @@
+name: Build Native Binaries
+
+on:
+  push:
+    branches: [main, master, 'qa/*']
+    tags: ['v*']
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - target: x86_64-apple-darwin
+            os: macos-13
+          - target: aarch64-apple-darwin
+            os: macos-14
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: crates/nexus_binding/package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: crates/nexus_binding
+
+      - name: Build native binding
+        run: npx napi build --platform --release --target ${{ matrix.target }}
+        working-directory: crates/nexus_binding
+
+      - name: List built files
+        run: ls -la *.node || dir *.node
+        working-directory: crates/nexus_binding
+        shell: bash
+        continue-on-error: true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bindings-${{ matrix.target }}
+          path: crates/nexus_binding/*.node
+          if-no-files-found: error
+
+  # Aggregate all binaries and publish (only on version tags)
+  publish:
+    name: Publish npm packages
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Move binaries to npm packages
+        run: |
+          # Windows x64
+          cp artifacts/bindings-x86_64-pc-windows-msvc/*.node \
+             crates/nexus_binding/npm/win32-x64-msvc/
+          
+          # macOS x64
+          cp artifacts/bindings-x86_64-apple-darwin/*.node \
+             crates/nexus_binding/npm/darwin-x64/
+          
+          # macOS arm64
+          cp artifacts/bindings-aarch64-apple-darwin/*.node \
+             crates/nexus_binding/npm/darwin-arm64/
+          
+          # Linux x64
+          cp artifacts/bindings-x86_64-unknown-linux-gnu/*.node \
+             crates/nexus_binding/npm/linux-x64-gnu/
+
+      - name: Publish platform packages
+        run: |
+          for dir in crates/nexus_binding/npm/*/; do
+            cd "$dir"
+            npm publish --access public || echo "Package may already exist"
+            cd -
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @nexus/core
+        run: npm publish --access public
+        working-directory: crates/nexus_binding
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish nexus CLI
+        run: npm publish --access public
+        working-directory: packages/nexus
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

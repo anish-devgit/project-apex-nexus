@@ -2,6 +2,7 @@ use axum::{
     extract::{Path, State},
     http::{HeaderMap, StatusCode, Uri},
     response::{IntoResponse, Response},
+    body::Body,
     routing::get,
     Router,
 };
@@ -11,17 +12,19 @@ use std::{
     sync::{Arc, RwLock},
 };
 use tower_http::{services::ServeDir, trace::TraceLayer};
+use tower::ServiceExt;
 
 pub mod graph;
 use graph::*;
 pub mod parser;
-use parser::extract_dependencies_detailed;
+use parser::{extract_dependencies_detailed, transform_cjs};
 pub mod compiler;
 use compiler::{compile, compile_css};
 pub mod bundler;
 pub mod watcher;
 pub mod resolver;
 use resolver::NexusResolver;
+pub mod runtime;
 
 // --- DATA STRUCTURES ---
 
@@ -161,7 +164,7 @@ async fn handle_module_logic(state: AppState, uri: Uri) -> Response {
     // Week 4: Extract Dependencies (from compiled/raw JS)
     let deps = extract_dependencies_detailed(&compiled_code, path_str);
 
-    let final_content;
+    let mut final_content;
     let module_id;
 
     {
@@ -412,6 +415,16 @@ async fn handle_chunk(
     (StatusCode::OK, headers, chunk).into_response()
 }
 
+// --- WEBSOCKET HANDLER ---
+
+async fn handle_ws(
+    State(_state): State<AppState>,
+) -> impl IntoResponse {
+    // TODO: Implement WebSocket upgrade for HMR
+    // For now, return 501 Not Implemented to unblock binary compilation
+    (StatusCode::NOT_IMPLEMENTED, "WebSocket HMR not yet implemented")
+}
+
 // --- SERVER ---
 
 pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error> {
@@ -469,14 +482,14 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
             
             if path.ends_with(".ts") || path.ends_with(".tsx") || path.ends_with(".js") || path.ends_with(".jsx") {
                 let response = handle_module_logic(state, uri).await;
-                Ok::<_, std::io::Error>(response)
+                Ok::<_, std::io::Error>(response.into_response())
             } else if path.starts_with("/_nexus/chunk") {
-                 let response = handle_chunk(state, uri).await;
-                 Ok::<_, std::io::Error>(response)
+                 let response = handle_chunk(State(state), uri).await;
+                 Ok::<_, std::io::Error>(response.into_response())
             } else {
                 let res = serve_dir.oneshot(req).await;
                 match res {
-                    Ok(r) => Ok(r.into_response()),
+                    Ok(r) => Ok(r.map(Body::new)),
                     Err(_) => Ok(StatusCode::INTERNAL_SERVER_ERROR.into_response()) 
                 }
             }
@@ -487,12 +500,13 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
         .route("/ws", get(handle_ws))
         .route("/_nexus/sourcemap/:id", get(handle_sourcemap))
         .fallback_service(service)
-        .layer(TraceLayer::new_for_http());
+        .layer(TraceLayer::new_for_http())
+        .with_state(state);
 
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     
     tracing::info!("starting server on {}", addr);
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    axum::serve(listener, app).await
+    axum::serve(listener, app.into_make_service()).await
 }
