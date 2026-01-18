@@ -103,8 +103,9 @@ pub fn transform_cjs(source: &str, path: &str, imports: &std::collections::HashM
 
     // 2. Declarations (Loop)
     for stmt in &program.body {
-        if let oxc_ast::ast::Statement::ModuleDeclaration(decl) = stmt {
-             match &decl.0 {
+        if let oxc_ast::ast::Statement::Declaration(d) = stmt {
+        if let oxc_ast::ast::Declaration::ModuleDeclaration(decl) = d {
+             match &**decl {
                 ModuleDeclaration::ImportDeclaration(import_decl) => {
                      // import "pkg" -> require("pkg")
                      let start = import_decl.span.start;
