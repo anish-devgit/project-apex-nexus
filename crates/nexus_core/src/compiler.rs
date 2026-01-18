@@ -1,7 +1,7 @@
 use oxc_allocator::Allocator;
 use oxc_parser::Parser;
 use oxc_span::SourceType;
-use oxc_codegen::{Codegen, CodegenOptions};
+use oxc_codegen::Codegen;
 use std::path::Path;
 
 pub struct CompileResult {
@@ -137,18 +137,16 @@ pub fn compile(source: &str, filename: &str, _is_prod: bool) -> CompileResult {
     
     let program = ret.program;
 
-    // 2. Transform (TS + JSX) - Temporarily disabled due to oxc_transformer API changes
-    // TODO: Re-enable after fixing transformer integration
-    // For now, we skip transformation which means TSX/JSX won't be transformed
-    // but at least the build will succeed
+    // 2. Transform (TS + JSX) - Disabled for now
+    // oxc v0.54 requires different transformer API
+    // For MVP, we skip transformation
     
     // 3. Codegen
-    let codegen = Codegen::new();
-    let ret = codegen.build(&program);
+    let ret = Codegen::new().build(&program);
 
     CompileResult {
-        code: ret.source_text,
-        sourcemap: ret.source_map.map(|sm| sm.to_json_string().unwrap_or_default()),
+        code: ret.code,
+        sourcemap: ret.map.map(|sm| sm.to_json_string().unwrap_or_default()),
         css: None,
         asset: None,
     }
