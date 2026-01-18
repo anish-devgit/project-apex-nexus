@@ -163,7 +163,6 @@ pub async fn start_watcher(
                         }
                      }
                 }
-            }
             Err(e) => tracing::error!("Watch error: {:?}", e),
         }
     }
