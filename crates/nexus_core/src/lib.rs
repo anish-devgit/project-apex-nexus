@@ -17,7 +17,7 @@ use tower::ServiceExt;
 pub mod graph;
 use graph::*;
 pub mod parser;
-use parser::extract_dependencies_detailed;
+use parser::{extract_dependencies_detailed, transform_cjs};
 pub mod compiler;
 use compiler::{compile, compile_css};
 pub mod bundler;
