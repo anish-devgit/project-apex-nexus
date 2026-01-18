@@ -1,0 +1,23 @@
+{
+  "name": "@nexus/core-darwin-x64",
+  "version": "0.1.0",
+  "cpu": [
+    "x64"
+  ],
+  "main": "nexus_binding.darwin-x64.node",
+  "files": [
+    "nexus_binding.darwin-x64.node"
+  ],
+  "description": "Nexus Build OS - Native Core Engine",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">= 16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/project-apex"
+  },
+  "os": [
+    "darwin"
+  ]
+}

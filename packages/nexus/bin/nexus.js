@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { startServer } = require('../index.js');
+const { startServer } = require('@nexus/core');
 const path = require('path');
 
 const args = process.argv.slice(2);

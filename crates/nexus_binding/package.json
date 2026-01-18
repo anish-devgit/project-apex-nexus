@@ -1,0 +1,46 @@
+{
+    "name": "@nexus/core",
+    "version": "0.1.0",
+    "description": "Nexus Build OS - Native Core Engine",
+    "main": "index.js",
+    "types": "index.d.ts",
+    "napi": {
+        "name": "nexus_binding",
+        "triples": {
+            "defaults": false,
+            "additional": [
+                "x86_64-pc-windows-msvc",
+                "x86_64-apple-darwin",
+                "aarch64-apple-darwin",
+                "x86_64-unknown-linux-gnu"
+            ]
+        }
+    },
+    "files": [
+        "index.js",
+        "index.d.ts"
+    ],
+    "devDependencies": {
+        "@napi-rs/cli": "^3.0.0-alpha.62"
+    },
+    "scripts": {
+        "artifacts": "napi artifacts",
+        "build": "napi build --platform --release",
+        "prepublishOnly": "napi prepublish -t npm",
+        "version": "napi version"
+    },
+    "optionalDependencies": {
+        "@nexus/core-win32-x64-msvc": "0.1.0",
+        "@nexus/core-darwin-x64": "0.1.0",
+        "@nexus/core-darwin-arm64": "0.1.0",
+        "@nexus/core-linux-x64-gnu": "0.1.0"
+    },
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/user/project-apex"
+    },
+    "engines": {
+        "node": ">= 16"
+    }
+}
