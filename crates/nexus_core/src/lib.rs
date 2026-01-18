@@ -11,6 +11,7 @@ use std::{
     sync::{Arc, RwLock},
 };
 use tower_http::{services::ServeDir, trace::TraceLayer};
+use tower::ServiceExt;
 
 pub mod graph;
 use graph::*;
@@ -474,7 +475,7 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
                  let response = handle_chunk(state, uri).await;
                  Ok::<_, std::io::Error>(response)
             } else {
-                let res = serve_dir.oneshot(req).await;
+                let res: Result<axum::response::Response, _> = serve_dir.oneshot(req).await;
                 match res {
                     Ok(r) => Ok(r.into_response()),
                     Err(_) => Ok(StatusCode::INTERNAL_SERVER_ERROR.into_response()) 
@@ -494,5 +495,5 @@ pub async fn start_server(root: String, port: u16) -> Result<(), std::io::Error>
     
     tracing::info!("starting server on {}", addr);
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    axum::serve(listener, app).await
+    axum::serve(listener, app.into_make_service()).await
 }
