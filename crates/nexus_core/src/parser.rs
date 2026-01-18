@@ -103,115 +103,111 @@ pub fn transform_cjs(source: &str, path: &str, imports: &std::collections::HashM
 
     // 2. Declarations (Loop)
     for stmt in &program.body {
-        if let oxc_ast::ast::Statement::Declaration(d) = stmt {
-        if let oxc_ast::ast::Declaration::ModuleDeclaration(decl) = d {
-             match &**decl {
-                ModuleDeclaration::ImportDeclaration(import_decl) => {
-                     // import "pkg" -> require("pkg")
-                     let start = import_decl.span.start;
-                     let end = import_decl.span.end;
-                     let source_val = import_decl.source.value.as_str();
-                     
-                     let resolved = imports.get(source_val).cloned().unwrap_or_else(|| source_val.to_string());
-                     
-                     if let Some(specifiers) = &import_decl.specifiers {
-                         if specifiers.is_empty() {
-                             replacements.push((start, end, format!("require(\"{}\");", resolved)));
-                         } else {
-                             let mut decls = Vec::new();
-                             for spec in specifiers {
-                                 match spec {
-                                     ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
-                                         let local = s.local.name.as_str();
-                                         decls.push(format!("const {} = require(\"{}\").default;", local, resolved));
-                                     }
-                                     ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => {
-                                          let local = s.local.name.as_str();
-                                          decls.push(format!("const {} = require(\"{}\");", local, resolved));
-                                     }
-                                     ImportDeclarationSpecifier::ImportSpecifier(s) => {
-                                          let local = s.local.name.as_str();
-                                          let imported = s.imported.name().as_str();
-                                          decls.push(format!("const {} = require(\"{}\").{};", local, resolved, imported));
-                                     }
+        match stmt {
+            oxc_ast::ast::Statement::ImportDeclaration(import_decl) => {
+                 // import "pkg" -> require("pkg")
+                 let start = import_decl.span.start;
+                 let end = import_decl.span.end;
+                 let source_val = import_decl.source.value.as_str();
+                 
+                 let resolved = imports.get(source_val).cloned().unwrap_or_else(|| source_val.to_string());
+                 
+                 if let Some(specifiers) = &import_decl.specifiers {
+                     if specifiers.is_empty() {
+                         replacements.push((start, end, format!("require(\"{}\");", resolved)));
+                     } else {
+                         let mut decls = Vec::new();
+                         for spec in specifiers {
+                             match spec {
+                                 ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
+                                     let local = s.local.name.as_str();
+                                     decls.push(format!("const {} = require(\"{}\").default;", local, resolved));
+                                 }
+                                 ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => {
+                                      let local = s.local.name.as_str();
+                                      decls.push(format!("const {} = require(\"{}\");", local, resolved));
+                                 }
+                                 ImportDeclarationSpecifier::ImportSpecifier(s) => {
+                                      let local = s.local.name.as_str();
+                                      let imported = s.imported.name().as_str();
+                                      decls.push(format!("const {} = require(\"{}\").{};", local, resolved, imported));
                                  }
                              }
-                             replacements.push((start, end, decls.join("\n")));
                          }
+                         replacements.push((start, end, decls.join("\n")));
+                     }
+                 }
+            }
+            oxc_ast::ast::Statement::ExportDefaultDeclaration(export_default) => {
+                let start = export_default.span.start;
+                
+                match &export_default.declaration {
+                     // oxc_ast::ast::ExportDefaultDeclarationKind::Expression(expr) => {
+                     //      replacements.push((start, expr.span.start, "exports.default = ".to_string()));
+                     // }
+                     _ => {
+                           match &export_default.declaration {
+                               oxc_ast::ast::ExportDefaultDeclarationKind::FunctionDeclaration(f) => {
+                                   replacements.push((start, f.span.start, "exports.default = ".to_string()));
+                               }
+                               oxc_ast::ast::ExportDefaultDeclarationKind::ClassDeclaration(c) => {
+                                   replacements.push((start, c.span.start, "exports.default = ".to_string()));
+                               }
+                               _ => {}
+                           }
                      }
                 }
-                ModuleDeclaration::ExportDefaultDeclaration(export_default) => {
-                    let start = export_default.span.start;
-                    
-                    match &export_default.declaration {
-                         // oxc_ast::ast::ExportDefaultDeclarationKind::Expression(expr) => {
-                         //      replacements.push((start, expr.span.start, "exports.default = ".to_string()));
-                         // }
-                         _ => {
-                               match &export_default.declaration {
-                                   oxc_ast::ast::ExportDefaultDeclarationKind::FunctionDeclaration(f) => {
-                                       replacements.push((start, f.span.start, "exports.default = ".to_string()));
-                                   }
-                                   oxc_ast::ast::ExportDefaultDeclarationKind::ClassDeclaration(c) => {
-                                       replacements.push((start, c.span.start, "exports.default = ".to_string()));
-                                   }
-                                   _ => {}
-                               }
-                         }
-                    }
-                }
-                ModuleDeclaration::ExportNamedDeclaration(export_named) => {
-                    let start = export_named.span.start;
-                    
-                    if let Some(decl) = &export_named.declaration {
-                        let mut names = Vec::new();
-                        let mut decl_start = start;
-                        
-                        match decl {
-                            oxc_ast::ast::Declaration::VariableDeclaration(var_decl) => {
-                                decl_start = var_decl.span.start;
-                                for d in &var_decl.declarations {
-                                     if let oxc_ast::ast::BindingPatternKind::BindingIdentifier(id) = &d.id.kind {
-                                         names.push(id.name.as_str().to_string());
-                                     }
-                                }
-                            }
-                            oxc_ast::ast::Declaration::FunctionDeclaration(f) => {
-                                decl_start = f.span.start;
-                                if let Some(id) = &f.id {
-                                    names.push(id.name.as_str().to_string());
-                                }
-                            }
-                            oxc_ast::ast::Declaration::ClassDeclaration(c) => {
-                                decl_start = c.span.start;
-                                if let Some(id) = &c.id {
-                                    names.push(id.name.as_str().to_string());
-                                }
-                            }
-                            _ => {}
-                        }
-                        
-                        if !names.is_empty() {
-                            replacements.push((start, decl_start, "".to_string()));
-                            let defines: Vec<String> = names.into_iter().map(|name| {
-                                format!("Object.defineProperty(exports, \"{}\", {{ enumerable: true, get: function() {{ return {}; }} }});", name, name)
-                            }).collect();
-                            replacements.push((export_named.span.end, export_named.span.end, format!("\n{}", defines.join("\n"))));
-                        }
-                        
-                    } else if !export_named.specifiers.is_empty() {
-                         let mut defines = Vec::new();
-                         for spec in &export_named.specifiers {
-                             let exported = spec.exported.name().as_str();
-                             let local = spec.local.name().as_str();
-                             defines.push(format!("Object.defineProperty(exports, \"{}\", {{ enumerable: true, get: function() {{ return {}; }} }});", exported, local));
-                         }
-                         replacements.push((start, export_named.span.end, defines.join("\n")));
-                    }
-                }
-                _ => {}
-             }
             }
+            oxc_ast::ast::Statement::ExportNamedDeclaration(export_named) => {
+                let start = export_named.span.start;
+                
+                if let Some(decl) = &export_named.declaration {
+                    let mut names = Vec::new();
+                    let mut decl_start = start;
+                    
+                    match decl {
+                        oxc_ast::ast::Declaration::VariableDeclaration(var_decl) => {
+                            decl_start = var_decl.span.start;
+                            for d in &var_decl.declarations {
+                                 if let oxc_ast::ast::BindingPatternKind::BindingIdentifier(id) = &d.id.kind {
+                                     names.push(id.name.as_str().to_string());
+                                 }
+                            }
+                        }
+                        oxc_ast::ast::Declaration::FunctionDeclaration(f) => {
+                            decl_start = f.span.start;
+                            if let Some(id) = &f.id {
+                                names.push(id.name.as_str().to_string());
+                            }
+                        }
+                        oxc_ast::ast::Declaration::ClassDeclaration(c) => {
+                            decl_start = c.span.start;
+                            if let Some(id) = &c.id {
+                                names.push(id.name.as_str().to_string());
+                            }
+                        }
+                        _ => {}
+                    }
+                    
+                    if !names.is_empty() {
+                        replacements.push((start, decl_start, "".to_string()));
+                        let defines: Vec<String> = names.into_iter().map(|name| {
+                            format!("Object.defineProperty(exports, \"{}\", {{ enumerable: true, get: function() {{ return {}; }} }});", name, name)
+                        }).collect();
+                        replacements.push((export_named.span.end, export_named.span.end, format!("\n{}", defines.join("\n"))));
+                    }
+                    
+                } else if !export_named.specifiers.is_empty() {
+                     let mut defines = Vec::new();
+                     for spec in &export_named.specifiers {
+                         let exported = spec.exported.name().as_str();
+                         let local = spec.local.name().as_str();
+                         defines.push(format!("Object.defineProperty(exports, \"{}\", {{ enumerable: true, get: function() {{ return {}; }} }});", exported, local));
+                     }
+                     replacements.push((start, export_named.span.end, defines.join("\n")));
+                }
+            }
+            _ => {}
         }
     }
 
@@ -374,80 +370,78 @@ pub fn transform_tree_shake(source: &str, path: &str, used_exports: &std::collec
     let program = ret.program;
     
     for stmt in program.body {
-        if let oxc_ast::ast::Statement::ModuleDeclaration(decl) = stmt {
-            match decl.0 {
-                ModuleDeclaration::ExportDefaultDeclaration(d) => {
-                    if !used_exports.contains("default") {
-                        // Remove entire statement
-                         replacements.push((d.span.start, d.span.end, "".to_string()));
-                    }
+        match stmt {
+            oxc_ast::ast::Statement::ExportDefaultDeclaration(d) => {
+                if !used_exports.contains("default") {
+                    // Remove entire statement
+                     replacements.push((d.span.start, d.span.end, "".to_string()));
                 }
-                ModuleDeclaration::ExportNamedDeclaration(d) => {
-                    if let Some(declaration) = &d.declaration {
-                        // export const x = 1;
-                        let mut keep = false;
-                        
-                        match declaration {
-                             oxc_ast::ast::Declaration::VariableDeclaration(var_decl) => {
-                                 for decl in &var_decl.declarations {
-                                     if let oxc_ast::ast::BindingPatternKind::BindingIdentifier(id) = &decl.id.kind {
-                                         if used_exports.contains(id.name.as_str()) {
-                                             keep = true;
-                                         }
+            }
+            oxc_ast::ast::Statement::ExportNamedDeclaration(d) => {
+                if let Some(declaration) = &d.declaration {
+                    // export const x = 1;
+                    let mut keep = false;
+                    
+                    match declaration {
+                         oxc_ast::ast::Declaration::VariableDeclaration(var_decl) => {
+                             for decl in &var_decl.declarations {
+                                 if let oxc_ast::ast::BindingPatternKind::BindingIdentifier(id) = &decl.id.kind {
+                                     if used_exports.contains(id.name.as_str()) {
+                                         keep = true;
                                      }
                                  }
                              }
-                             oxc_ast::ast::Declaration::FunctionDeclaration(f) => {
-                                 if let Some(id) = &f.id {
-                                      if used_exports.contains(id.name.as_str()) {
-                                          keep = true;
-                                      }
-                                 }
+                         }
+                         oxc_ast::ast::Declaration::FunctionDeclaration(f) => {
+                             if let Some(id) = &f.id {
+                                  if used_exports.contains(id.name.as_str()) {
+                                      keep = true;
+                                  }
                              }
-                             oxc_ast::ast::Declaration::ClassDeclaration(c) => {
-                                 if let Some(id) = &c.id {
-                                      if used_exports.contains(id.name.as_str()) {
-                                          keep = true;
-                                      }
-                                 }
+                         }
+                         oxc_ast::ast::Declaration::ClassDeclaration(c) => {
+                             if let Some(id) = &c.id {
+                                  if used_exports.contains(id.name.as_str()) {
+                                      keep = true;
+                                  }
                              }
-                             _ => {}
-                        }
-                        
-                        if !keep {
-                            // Safely remove
-                            replacements.push((d.span.start, d.span.end, "".to_string()));
-                        }
-                    } else if !d.specifiers.is_empty() {
-                        // export { x, y }
-                        let mut kept_specs = Vec::new();
-                        for spec in &d.specifiers {
-                            let exported = spec.exported.name().as_str();
-                            if used_exports.contains(exported) {
-                                let local = spec.local.name().as_str();
-                                if local == exported {
-                                    kept_specs.push(local.to_string());
-                                } else {
-                                    kept_specs.push(format!("{} as {}", local, exported));
-                                }
+                         }
+                         _ => {}
+                    }
+                    
+                    if !keep {
+                        // Safely remove
+                        replacements.push((d.span.start, d.span.end, "".to_string()));
+                    }
+                } else if !d.specifiers.is_empty() {
+                    // export { x, y }
+                    let mut kept_specs = Vec::new();
+                    for spec in &d.specifiers {
+                        let exported = spec.exported.name().as_str();
+                        if used_exports.contains(exported) {
+                            let local = spec.local.name().as_str();
+                            if local == exported {
+                                kept_specs.push(local.to_string());
+                            } else {
+                                kept_specs.push(format!("{} as {}", local, exported));
                             }
                         }
-                        
-                        if kept_specs.is_empty() {
-                            replacements.push((d.span.start, d.span.end, "".to_string()));
+                    }
+                    
+                    if kept_specs.is_empty() {
+                        replacements.push((d.span.start, d.span.end, "".to_string()));
+                    } else {
+                        // Rewrite
+                        let new_stmt = if let Some(src) = &d.source {
+                            format!("export {{ {} }} from \"{}\";", kept_specs.join(", "), src.value.as_str())
                         } else {
-                            // Rewrite
-                            let new_stmt = if let Some(src) = &d.source {
-                                format!("export {{ {} }} from \"{}\";", kept_specs.join(", "), src.value.as_str())
-                            } else {
-                                format!("export {{ {} }};", kept_specs.join(", "))
-                            };
-                            replacements.push((d.span.start, d.span.end, new_stmt));
-                        }
+                            format!("export {{ {} }};", kept_specs.join(", "))
+                        };
+                        replacements.push((d.span.start, d.span.end, new_stmt));
                     }
                 }
-                _ => {}
             }
+            _ => {}
         }
     }
     
