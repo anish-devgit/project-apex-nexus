@@ -1,12 +1,12 @@
 {
-    "name": "nexus-test",
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "dev": "nexus dev"
-    },
-    "dependencies": {
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0"
-    }
+  "name": "nexus-test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

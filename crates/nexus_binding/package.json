@@ -1,6 +1,6 @@
 {
     "name": "@apexjs/core",
-    "version": "0.1.0-alpha.2",
+    "version": "0.1.0-alpha.3",
     "description": "Nexus Build OS - Native Core Engine",
     "main": "index.js",
     "types": "index.d.ts",
@@ -30,10 +30,10 @@
         "version": "napi version"
     },
     "optionalDependencies": {
-        "@apexjs/core-win32-x64-msvc": "0.1.0-alpha.2",
-        "@apexjs/core-darwin-x64": "0.1.0-alpha.2",
-        "@apexjs/core-darwin-arm64": "0.1.0-alpha.2",
-        "@apexjs/core-linux-x64-gnu": "0.1.0-alpha.2"
+        "@apexjs/core-win32-x64-msvc": "0.1.0-alpha.3",
+        "@apexjs/core-darwin-x64": "0.1.0-alpha.3",
+        "@apexjs/core-darwin-arm64": "0.1.0-alpha.3",
+        "@apexjs/core-linux-x64-gnu": "0.1.0-alpha.3"
     },
     "license": "Apache-2.0",
     "repository": {
