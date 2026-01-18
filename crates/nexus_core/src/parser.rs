@@ -210,6 +210,7 @@ pub fn transform_cjs(source: &str, path: &str, imports: &std::collections::HashM
                 }
                 _ => {}
              }
+            }
         }
     }
 

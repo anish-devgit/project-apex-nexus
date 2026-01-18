@@ -146,7 +146,7 @@ pub fn compile(source: &str, filename: &str, _is_prod: bool) -> CompileResult {
 
     CompileResult {
         code: ret.code,
-        sourcemap: ret.map.map(|sm| sm.to_json_string().unwrap_or_default()),
+        sourcemap: ret.map.map(|sm| sm.to_json_string()),
         css: None,
         asset: None,
     }
