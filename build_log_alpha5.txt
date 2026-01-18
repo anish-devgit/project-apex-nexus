@@ -1,0 +1,16 @@
+
+X v0.1.0-alpha.5 Build Native Binaries · 21114890224
+Triggered via push about 1 minute ago
+
+X Build x86_64-apple-darwin in 0s (ID 60718961211)
+
+ANNOTATIONS
+X The macOS-13 based runner images are now retired. For more details, see https://github.com/actions/runner-images/issues/13046.
+Build x86_64-apple-darwin: .github#1
+
+- The macOS-13 based runner images are being deprecated, consider switching to macOS-15 (macos-15-intel) or macOS 15 arm64 (macos-latest) instead. For more details see https://github.com/actions/runner-images/issues/13046
+Build x86_64-apple-darwin: .github#1
+
+
+To see the full job log, try: gh run view --log --job=60718961211
+View this run on GitHub: https://github.com/anish-devgit/project-apex-nexus/actions/runs/21114890224

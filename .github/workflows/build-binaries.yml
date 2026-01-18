@@ -119,6 +119,15 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Restore optional dependencies
+        run: |
+           VERSION=$(node -p "require('./package.json').version")
+           npm pkg set optionalDependencies.@apexjs/core-win32-x64-msvc=$VERSION
+           npm pkg set optionalDependencies.@apexjs/core-darwin-x64=$VERSION
+           npm pkg set optionalDependencies.@apexjs/core-darwin-arm64=$VERSION
+           npm pkg set optionalDependencies.@apexjs/core-linux-x64-gnu=$VERSION
+        working-directory: crates/nexus_binding
+
       - name: Publish @nexus/core
         run: npm publish --access public
         working-directory: crates/nexus_binding
