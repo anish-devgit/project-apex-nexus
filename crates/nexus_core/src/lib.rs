@@ -23,6 +23,7 @@ pub mod bundler;
 pub mod watcher;
 pub mod resolver;
 use resolver::NexusResolver;
+pub mod runtime;
 
 // --- DATA STRUCTURES ---
 
