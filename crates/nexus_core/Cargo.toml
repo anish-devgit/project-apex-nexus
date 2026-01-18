@@ -19,7 +19,6 @@ mime_guess = "2.0"
 lightningcss = "1.0.0-alpha.57"
 base64 = "0.21"
 urlencoding = "2.1"
-runtime =  { path = "../runtime" }
 oxc_allocator = "0.54"
 oxc_parser = "0.54"
 oxc_span = "0.54"
