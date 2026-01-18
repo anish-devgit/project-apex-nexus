@@ -2,10 +2,10 @@ name: Build Native Binaries
 
 on:
   push:
-    branches: [main]
+    branches: [main, master, 'qa/*']
     tags: ['v*']
   pull_request:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:
 
 env:
