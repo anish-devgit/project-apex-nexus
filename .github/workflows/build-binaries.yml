@@ -41,7 +41,7 @@ jobs:
           cache-dependency-path: crates/nexus_binding/package-lock.json
 
       - name: Setup Rust
-        uses: dtolnay/rust-action@stable
+        uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
 
