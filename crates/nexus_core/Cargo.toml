@@ -15,7 +15,7 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 futures = "0.3"
 mime_guess = "2.0"
-lightningcss = "1.0"
+lightningcss = "1.0.0-alpha.57"
 base64 = "0.21"
 oxc_allocator = "0.13.0"
 oxc_parser = "0.13.0"
