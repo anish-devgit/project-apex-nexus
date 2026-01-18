@@ -143,9 +143,9 @@ pub fn transform_cjs(source: &str, path: &str, imports: &std::collections::HashM
                     let start = export_default.span.start;
                     
                     match &export_default.declaration {
-                         oxc_ast::ast::ExportDefaultDeclarationKind::Expression(expr) => {
-                              replacements.push((start, expr.span.start, "exports.default = ".to_string()));
-                         }
+                         // oxc_ast::ast::ExportDefaultDeclarationKind::Expression(expr) => {
+                         //      replacements.push((start, expr.span.start, "exports.default = ".to_string()));
+                         // }
                          _ => {
                                match &export_default.declaration {
                                    oxc_ast::ast::ExportDefaultDeclarationKind::FunctionDeclaration(f) => {
