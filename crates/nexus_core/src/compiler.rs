@@ -144,7 +144,7 @@ pub fn compile(source: &str, filename: &str, _is_prod: bool) -> CompileResult {
     // but at least the build will succeed
     
     // 3. Codegen - Fixed to use correct oxc_codegen v0.13.0 API
-    let codegen = Codegen::<false>::new(source, filename, CodegenOptions::default());
+    let codegen = Codegen::<false>::new(source, filename, CodegenOptions::default(), None);
     let ret = codegen.build(&program);
 
     CompileResult {
