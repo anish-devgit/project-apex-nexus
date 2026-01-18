@@ -144,11 +144,7 @@ pub fn compile(source: &str, filename: &str, is_prod: bool) -> CompileResult {
     // but at least the build will succeed
     
     // 3. Codegen
-    let ret = Codegen::new().with_options(CodegenOptions {
-        source_map_path: Some(std::path::PathBuf::from(filename)),
-        ..CodegenOptions::default()
-    }).build(&program);
-
+    let ret = Codegen::new().build(&program);
     CompileResult {
         code: ret.source_text,
         sourcemap: ret.source_map.map(|sm: oxc_codegen::SourceMap| sm.to_json_string().unwrap_or_default()),
