@@ -1,5 +1,5 @@
 {
-    "name": "nexus",
+    "name": "@apexjs/nexus",
     "version": "0.1.0",
     "description": "Nexus Build OS - Ultra-fast frontend tooling",
     "main": "bin/nexus.js",
@@ -7,7 +7,7 @@
         "nexus": "./bin/nexus.js"
     },
     "dependencies": {
-        "@nexus/core": "0.1.0"
+        "@apexjs/core": "0.1.0"
     },
     "keywords": [
         "bundler",

@@ -1,5 +1,5 @@
 {
-  "name": "@nexus/core-darwin-x64",
+  "name": "@apexjs/core-darwin-x64",
   "version": "0.1.0",
   "cpu": [
     "x64"

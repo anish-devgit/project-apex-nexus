@@ -8,13 +8,13 @@ function getBinding() {
   
   switch (platformArch) {
     case 'win32-x64':
-      return require('@nexus/core-win32-x64-msvc');
+      return require('@apexjs/core-win32-x64-msvc');
     case 'darwin-x64':
-      return require('@nexus/core-darwin-x64');
+      return require('@apexjs/core-darwin-x64');
     case 'darwin-arm64':
-      return require('@nexus/core-darwin-arm64');
+      return require('@apexjs/core-darwin-arm64');
     case 'linux-x64':
-      return require('@nexus/core-linux-x64-gnu');
+      return require('@apexjs/core-linux-x64-gnu');
     default:
       throw new Error(
         `Unsupported platform: ${platform}-${arch}. ` +

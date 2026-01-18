@@ -1,5 +1,5 @@
 {
-  "name": "@nexus/core-darwin-arm64",
+  "name": "@apexjs/core-darwin-arm64",
   "version": "0.1.0",
   "cpu": [
     "arm64"
