@@ -125,7 +125,7 @@ pub fn compile_css(source: &str, _filename: &str, is_prod: bool) -> CompileResul
     }
 }
 
-pub fn compile(source: &str, filename: &str, is_prod: bool) -> CompileResult {
+pub fn compile(source: &str, filename: &str, _is_prod: bool) -> CompileResult {
     let allocator = Allocator::default();
     let source_type = SourceType::from_path(Path::new(filename)).unwrap_or_default();
     
@@ -143,11 +143,13 @@ pub fn compile(source: &str, filename: &str, is_prod: bool) -> CompileResult {
     // For now, we skip transformation which means TSX/JSX won't be transformed
     // but at least the build will succeed
     
-    // 3. Codegen
-    let ret = Codegen::new().build(&program);
+    // 3. Codegen - Fixed to use correct oxc_codegen v0.13.0 API
+    let codegen = Codegen::<false>::new(source, CodegenOptions::default());
+    let ret = codegen.build(&program);
+
     CompileResult {
         code: ret.source_text,
-        sourcemap: ret.source_map.map(|sm: oxc_codegen::SourceMap| sm.to_json_string().unwrap_or_default()),
+        sourcemap: ret.source_map.map(|sm| sm.to_json_string().unwrap_or_default()),
         css: None,
         asset: None,
     }
