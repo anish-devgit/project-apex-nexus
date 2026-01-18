@@ -170,7 +170,7 @@ pub fn compile(source: &str, filename: &str, is_prod: bool) -> CompileResult {
 
     CompileResult {
         code: ret.source_text,
-        sourcemap: ret.source_map.map(|sm| sm.to_json_string().unwrap_or_default()),
+        sourcemap: ret.source_map.map(|sm: oxc_codegen::SourceMap| sm.to_json_string().unwrap_or_default()),
         css: None,
         asset: None,
     }
