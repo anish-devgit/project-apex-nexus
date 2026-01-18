@@ -1,0 +1,157 @@
+Build x86_64-unknown-linux-gnu	Set up job	﻿2026-01-18T16:27:31.1641520Z Current runner version: '2.331.0'
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1666959Z ##[group]Runner Image Provisioner
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1667812Z Hosted Compute Agent
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1668399Z Version: 20251211.462
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1668982Z Commit: 6cbad8c2bb55d58165063d031ccabf57e2d2db61
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1669789Z Build Date: 2025-12-11T16:28:49Z
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1670660Z Worker ID: {88b810a7-b24e-43d0-b0db-9f30ef941444}
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1671336Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1671933Z ##[group]Operating System
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1672754Z Ubuntu
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1673245Z 24.04.3
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1673649Z LTS
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1674200Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1674688Z ##[group]Runner Image
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1675199Z Image: ubuntu-24.04
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1675780Z Version: 20260111.209.1
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1676733Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260111.209/images/ubuntu/Ubuntu2404-Readme.md
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1678075Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260111.209
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1679286Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1680336Z ##[group]GITHUB_TOKEN Permissions
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1682540Z Contents: read
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1683081Z Metadata: read
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1683674Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1685641Z Secret source: Actions
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.1686350Z Prepare workflow directory
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.2190540Z Prepare all required actions
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.2245220Z Getting action download info
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.5596787Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.6727987Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:31.7664016Z Download action repository 'dtolnay/rust-toolchain@stable' (SHA:4be9e76fd7c4901c61fb841f559994984270fce7)
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:32.0104466Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Build x86_64-unknown-linux-gnu	Set up job	2026-01-18T16:27:32.2549672Z Complete job name: Build x86_64-unknown-linux-gnu
+Build x86_64-unknown-linux-gnu	Checkout repository	﻿2026-01-18T16:27:32.3296523Z ##[group]Run actions/checkout@v4
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3297372Z with:
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3297823Z   repository: anish-devgit/project-apex-nexus
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3298526Z   token: ***
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3298901Z   ssh-strict: true
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3299335Z   ssh-user: git
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3299787Z   persist-credentials: true
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3300273Z   clean: true
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3300707Z   sparse-checkout-cone-mode: true
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3301224Z   fetch-depth: 1
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3301592Z   fetch-tags: false
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3302037Z   show-progress: true
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3302586Z   lfs: false
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3302949Z   submodules: false
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3303337Z   set-safe-directory: true
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3304009Z env:
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3304377Z   CARGO_TERM_COLOR: always
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.3304803Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.4381738Z Syncing repository: anish-devgit/project-apex-nexus
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.4384000Z ##[group]Getting Git version info
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.4384873Z Working directory is '/home/runner/work/project-apex-nexus/project-apex-nexus'
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.4385911Z [command]/usr/bin/git version
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7355709Z git version 2.52.0
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7383841Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7407573Z Temporarily overriding HOME='/home/runner/work/_temp/20fee5c3-0894-415f-a39c-9ad82e22157e' before making global git config changes
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7411518Z Adding repository directory to the temporary git global config as a safe directory
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7415450Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/project-apex-nexus/project-apex-nexus
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7457798Z Deleting the contents of '/home/runner/work/project-apex-nexus/project-apex-nexus'
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7461358Z ##[group]Initializing the repository
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7466752Z [command]/usr/bin/git init /home/runner/work/project-apex-nexus/project-apex-nexus
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7601618Z hint: Using 'master' as the name for the initial branch. This default branch name
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7604175Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7606781Z hint: to use in all of your new repositories, which will suppress this warning,
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7609281Z hint: call:
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7610527Z hint:
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7612562Z hint: 	git config --global init.defaultBranch <name>
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7614810Z hint:
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7616648Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7620085Z hint: 'development'. The just-created branch can be renamed via this command:
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7622908Z hint:
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7624123Z hint: 	git branch -m <name>
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7625541Z hint:
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7627266Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7630007Z Initialized empty Git repository in /home/runner/work/project-apex-nexus/project-apex-nexus/.git/
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7636029Z [command]/usr/bin/git remote add origin https://github.com/anish-devgit/project-apex-nexus
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7657338Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7659909Z ##[group]Disabling automatic garbage collection
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7662528Z [command]/usr/bin/git config --local gc.auto 0
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7691375Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7693957Z ##[group]Setting up auth
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7699155Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.7732069Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.8093567Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.8123890Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.8344567Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.8374480Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.8593764Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.8627765Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.8629208Z ##[group]Fetching the repository
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:32.8637554Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +8fe7fa9dffd5664c2bb349011741fd04ee43c6a4:refs/tags/v0.1.0-alpha.6
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1001580Z From https://github.com/anish-devgit/project-apex-nexus
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1002829Z  * [new ref]         8fe7fa9dffd5664c2bb349011741fd04ee43c6a4 -> v0.1.0-alpha.6
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1029883Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1030461Z ##[group]Determining the checkout info
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1033078Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1038945Z [command]/usr/bin/git sparse-checkout disable
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1080826Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1105726Z ##[group]Checking out the ref
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1108973Z [command]/usr/bin/git checkout --progress --force refs/tags/v0.1.0-alpha.6
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1202019Z Note: switching to 'refs/tags/v0.1.0-alpha.6'.
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1202848Z 
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1203342Z You are in 'detached HEAD' state. You can look around, make experimental
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1204432Z changes and commit them, and you can discard any commits you make in this
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1205465Z state without impacting any branches by switching back to a branch.
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1206073Z 
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1206821Z If you want to create a new branch to retain commits you create, you may
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1207564Z do so (now or later) by using -c with the switch command. Example:
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1207902Z 
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1208115Z   git switch -c <new-branch-name>
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1208351Z 
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1208500Z Or undo this operation with:
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1208725Z 
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1208852Z   git switch -
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1209031Z 
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1209305Z Turn off this advice by setting config variable advice.detachedHead to false
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1209682Z 
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1210038Z HEAD is now at 8fe7fa9 fix: dynamically inject optional deps during release to fix ci
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1211767Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1243866Z [command]/usr/bin/git log -1 --format=%H
+Build x86_64-unknown-linux-gnu	Checkout repository	2026-01-18T16:27:33.1264859Z 8fe7fa9dffd5664c2bb349011741fd04ee43c6a4
+Build x86_64-unknown-linux-gnu	Setup Node.js	﻿2026-01-18T16:27:33.1506460Z ##[group]Run actions/setup-node@v4
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.1506947Z with:
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.1507309Z   node-version: 20
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.1507676Z   cache: npm
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.1508136Z   cache-dependency-path: crates/nexus_binding/package-lock.json
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.1508670Z   always-auth: false
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.1509046Z   check-latest: false
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.1509562Z   token: ***
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.1509908Z env:
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.1510237Z   CARGO_TERM_COLOR: always
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.1510601Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.3308252Z Found in cache @ /opt/hostedtoolcache/node/20.19.6/x64
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.3318420Z ##[group]Environment details
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.7024091Z node: v20.19.6
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.7025281Z npm: 10.8.2
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.7025577Z yarn: 1.22.22
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.7028037Z ##[endgroup]
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.7056489Z [command]/opt/hostedtoolcache/node/20.19.6/x64/bin/npm config get cache
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.8363960Z /home/runner/.npm
+Build x86_64-unknown-linux-gnu	Setup Node.js	2026-01-18T16:27:33.8511498Z ##[error]Some specified paths were not resolved, unable to cache dependencies.
+Build x86_64-unknown-linux-gnu	Post Checkout repository	﻿2026-01-18T16:27:33.8691708Z Post job cleanup.
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:33.9627182Z [command]/usr/bin/git version
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:33.9663093Z git version 2.52.0
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:33.9705361Z Temporarily overriding HOME='/home/runner/work/_temp/c5c11b9a-74b9-430c-81ae-f23c5d0ab4a0' before making global git config changes
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:33.9706661Z Adding repository directory to the temporary git global config as a safe directory
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:33.9717590Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/project-apex-nexus/project-apex-nexus
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:33.9749685Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:33.9781361Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:34.0010299Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:34.0030244Z http.https://github.com/.extraheader
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:34.0042607Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:34.0072009Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:34.0289659Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build x86_64-unknown-linux-gnu	Post Checkout repository	2026-01-18T16:27:34.0318693Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build x86_64-unknown-linux-gnu	Complete job	﻿2026-01-18T16:27:34.0649625Z Cleaning up orphan processes
